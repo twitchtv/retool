@@ -1,0 +1,12 @@
+{
+  "Tools": [
+    {
+      "Repository": "code.justin.tv/common/twirp/protoc-gen-twirp",
+      "Commit": "24eb49ba0f7cd692f60f11af1cba4a515ab64e06"
+    },
+    {
+      "Repository": "github.com/golang/protobuf/protoc-gen-go",
+      "Commit": "2fea9e168bab814ca0c6e292a6be164f624fc6ca"
+    }
+  ]
+}
