@@ -7,16 +7,14 @@ import (
 )
 
 func log(msg string) {
-	if *verbose {
-		fmt.Fprintf(os.Stderr, "retool: %s\n", msg)
-	}
+	fmt.Fprintf(os.Stderr, "retool: %s\n", msg)
 }
 
 func fatal(msg string, err error) {
 	if err == nil {
-		fmt.Fprintf(os.Stderr, "fatal err: %s\n", msg)
+		fmt.Fprintf(os.Stderr, "retool: fatal err: %s\n", msg)
 	} else {
-		fmt.Fprintf(os.Stderr, "fatal err: %s: %s\n", msg, err)
+		fmt.Fprintf(os.Stderr, "retool: fatal err: %s: %s\n", msg, err)
 	}
 	os.Exit(1)
 }

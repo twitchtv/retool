@@ -79,7 +79,7 @@ func setGopath(cmd *exec.Cmd) {
 }
 
 func get(t tool) error {
-	log("go get -d " + t.Repository)
+	log("downloading " + t.Repository)
 	cmd := exec.Command("go", "get", "-d", t.Repository)
 	setGopath(cmd)
 	_, err := cmd.Output()
@@ -129,8 +129,6 @@ func install(t tool) error {
 		if err != nil {
 			fatalExec("go get -d "+t.Repository, err)
 		}
-	} else {
-		log(t.Repository + " already downloaded")
 	}
 
 	correctVersion, err := t.correctVersion()
@@ -142,8 +140,6 @@ func install(t tool) error {
 		if err != nil {
 			fatalExec("git checkout "+t.Commit, err)
 		}
-	} else {
-		log(t.Repository + " at correct version")
 	}
 
 	if !downloaded || !correctVersion {
@@ -151,8 +147,6 @@ func install(t tool) error {
 		if err != nil {
 			fatalExec("go install "+t.Repository, err)
 		}
-	} else {
-		log("nothing to do for " + t.Repository)
 	}
 
 	return nil

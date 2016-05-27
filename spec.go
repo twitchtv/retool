@@ -6,16 +6,17 @@ import (
 	"os"
 )
 
+// Filename to read/write the spec data.
 const specfile = "tools.json"
 
 type spec struct {
 	Tools []tool
 }
 
-func (s spec) Write(filename string) error {
-	f, err := os.Create(filename)
+func (s spec) write() error {
+	f, err := os.Create(specfile)
 	if err != nil {
-		return fmt.Errorf("unable to open %s: %s", filename, err)
+		return fmt.Errorf("unable to open %s: %s", specfile, err)
 	}
 	defer f.Close()
 
@@ -26,7 +27,7 @@ func (s spec) Write(filename string) error {
 
 	_, err = f.Write(bytes)
 	if err != nil {
-		return fmt.Errorf("unable to write %s: %s", filename, err)
+		return fmt.Errorf("unable to write %s: %s", specfile, err)
 	}
 
 	return nil
@@ -39,7 +40,7 @@ func (s spec) add(t tool) {
 	}
 
 	s.Tools = append(s.Tools, t)
-	err := s.Write(specfile)
+	err := s.write()
 	if err != nil {
 		fatal("unable to add "+t.Repository, err)
 	}
@@ -54,7 +55,7 @@ func (s spec) remove(t tool) {
 	}
 	s.Tools = append(s.Tools[:idx], s.Tools[idx+1:]...)
 
-	err := s.Write(specfile)
+	err := s.write()
 	if err != nil {
 		fatal("unable to remove "+t.Repository, err)
 	}
@@ -71,7 +72,7 @@ func (s spec) upgrade(t tool) {
 
 	s.Tools[idx].Commit = t.Commit
 
-	err := s.Write(specfile)
+	err := s.write()
 	if err != nil {
 		fatal("unable to remove "+t.Repository, err)
 	}
@@ -97,10 +98,10 @@ func (s spec) sync() {
 	}
 }
 
-func read(filename string) (spec, error) {
-	file, err := os.Open(filename)
+func read() (spec, error) {
+	file, err := os.Open(specfile)
 	if err != nil {
-		return spec{}, fmt.Errorf("unable to open spec file at %s: %s", filename, err)
+		return spec{}, fmt.Errorf("unable to open spec file at %s: %s", specfile, err)
 	}
 	defer file.Close()
 
@@ -112,8 +113,8 @@ func read(filename string) (spec, error) {
 	return *s, nil
 }
 
-func specExists(filename string) bool {
-	_, err := os.Stat(filename)
+func specExists() bool {
+	_, err := os.Stat(specfile)
 	if os.IsNotExist(err) {
 		return false
 	}
@@ -123,6 +124,6 @@ func specExists(filename string) bool {
 	return true
 }
 
-func initializeSpec(filename string) error {
-	return spec{[]tool{}}.Write(filename)
+func writeBlankSpec() error {
+	return spec{[]tool{}}.write()
 }
