@@ -10,7 +10,7 @@ retool add github.com/golang/protobuf/protoc-gen-go 2fea9e168bab814ca0c6e292a6be
 Use it to generate code:
 ```sh
 # calls go generate ./... using only tools installed with retool
-retool generate
+retool do go generate ./...
 ```
 
 Upgrade your tools:
@@ -102,6 +102,7 @@ it in to git so that everybody stays in sync, but you manage it with
 `retool add|upgrade|remove`.
 
 When it's time to generate code, **instead of `go generate ./...`**,
-you use `retool generate` to use your sweet, vendored tools. This
-really just calls `PATH=$PWD/_tools/bin:PATH go generate ./...`; if
-you want to do anything fancy, you can feel free to use that path too.
+you use `retool do go generate ./...` to use your sweet, vendored
+tools. This really just calls `PATH=$PWD/_tools/bin:PATH go generate
+./...`; if you want to do anything fancy, you can feel free to use
+that path too.
