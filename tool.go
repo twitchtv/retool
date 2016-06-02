@@ -102,7 +102,7 @@ func setVersion(t tool) error {
 }
 
 func getVersion(t tool) (string, error) {
-	cmd := exec.Command("git", "rev-parse", "head")
+	cmd := exec.Command("git", "rev-parse", "HEAD")
 	cmd.Dir = t.path()
 	output, err := cmd.Output()
 	if err != nil {

@@ -93,7 +93,7 @@ func (s spec) sync() {
 	for _, t := range s.Tools {
 		err := install(t)
 		if err != nil {
-			fatal("failed to sync "+t.Repository, err)
+			fatalExec("failed to sync "+t.Repository, err)
 		}
 	}
 }
