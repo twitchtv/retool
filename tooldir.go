@@ -1,8 +1,10 @@
 package main
 
 import (
+	"io/ioutil"
 	"os"
 	"path"
+	"strings"
 )
 
 var tooldir string
@@ -30,4 +32,15 @@ func ensureTooldir() {
 	if !stat.IsDir() {
 		fatal("%s already exists, but it is not a directory. This is where tools would go, so giving up.", nil)
 	}
+
+	err = ioutil.WriteFile(path.Join(tooldir, ".gitignore"), gitignore, 0664)
+	if err != nil {
+		fatal("unable to update .gitignore", err)
+	}
 }
+
+var gitignore = []byte(strings.TrimLeft(`
+bin/
+pkg/
+manifest.json
+`, "\n"))
