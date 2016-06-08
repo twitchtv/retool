@@ -11,7 +11,7 @@ import (
 
 func clean(pkgs []string) {
 	// This is rude but shouldn't be an issue...
-	build.Default.GOPATH = path.Join(tooldir, "src")
+	build.Default.GOPATH = tooldir
 
 	// A recursive helper to take a list of packages and find their dependencies deeply
 	found := map[string]struct{}{}
@@ -41,11 +41,6 @@ func clean(pkgs []string) {
 	keep := resolve(pkgs)
 	base := path.Join(tooldir, "src")
 
-	whitelist := map[string]struct{}{}
-	for _, p := range keep {
-		whitelist[p] = struct{}{}
-	}
-
 	var toDelete []string
 	err := filepath.Walk(base, func(path string, info os.FileInfo, err error) error {
 		// Bubble up errors
@@ -58,7 +53,7 @@ func clean(pkgs []string) {
 			return nil
 		}
 
-		// Get the package name
+		// Get the package directory
 		pkg, err := filepath.Rel(base, path)
 		if err != nil {
 			return err
@@ -68,7 +63,7 @@ func clean(pkgs []string) {
 		// and any non-go or test files.
 		if !info.IsDir() {
 			pkg = filepath.Dir(pkg)
-			_, keptPkg := whitelist[pkg]
+			_, keptPkg := found[pkg]
 			isGo := strings.HasSuffix(path, ".go")
 			isTest := strings.HasSuffix(path, "_test.go")
 			if !keptPkg || !isGo || isTest {
