@@ -19,17 +19,15 @@ func init() {
 
 func ensureTooldir() {
 	stat, err := os.Stat(tooldir)
-	if os.IsNotExist(err) {
+	switch {
+	case os.IsNotExist(err):
 		err = os.Mkdir(tooldir, 0777)
 		if err != nil {
 			fatal("unable to create tooldir", err)
 		}
-		return
-	}
-	if err != nil {
+	case err != nil:
 		fatal("unable to stat tool directory: %s", err)
-	}
-	if !stat.IsDir() {
+	case !stat.IsDir():
 		fatal("%s already exists, but it is not a directory. This is where tools would go, so giving up.", nil)
 	}
 

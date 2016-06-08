@@ -77,14 +77,6 @@ func installBin(t tool) error {
 	return err
 }
 
-func cleanGit(t tool) error {
-	log("cleaning " + t.Repository)
-	cmd := exec.Command("rm", "-r", "-f", ".git")
-	cmd.Dir = t.path()
-	_, err := cmd.Output()
-	return err
-}
-
 func install(t tool) error {
 	err := get(t)
 	if err != nil {
@@ -99,11 +91,6 @@ func install(t tool) error {
 	err = installBin(t)
 	if err != nil {
 		fatalExec("go install "+t.Repository, err)
-	}
-
-	err = cleanGit(t)
-	if err != nil {
-		fatalExec("rm -rf .git of "+t.Repository, err)
 	}
 
 	return nil

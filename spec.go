@@ -116,7 +116,18 @@ func (s spec) sync() {
 		// Write a fresh manifest
 		m.replace(s.Tools)
 		m.write()
+
+		// Delete unneccessary source files
+		s.cleanup()
 	}
+}
+
+func (s spec) cleanup() {
+	var pkgs []string
+	for _, t := range s.Tools {
+		pkgs = append(pkgs, t.Repository)
+	}
+	clean(pkgs)
 }
 
 func read() (spec, error) {
