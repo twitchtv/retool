@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"os/exec"
 )
 
 // Filename to read/write the spec data.
@@ -34,53 +33,6 @@ func (s spec) write() error {
 	return nil
 }
 
-func (s spec) add(t tool) {
-	if s.find(t) != -1 {
-		log(t.Repository + " already installed (did you mean retool upgrade?)")
-		return
-	}
-
-	s.Tools = append(s.Tools, t)
-	err := s.write()
-	if err != nil {
-		fatal("unable to add "+t.Repository, err)
-	}
-
-	s.sync()
-}
-
-func (s spec) remove(t tool) {
-	idx := s.find(t)
-	if idx == -1 {
-		fatal(t.Repository+" is not in tools.json", nil)
-	}
-	s.Tools = append(s.Tools[:idx], s.Tools[idx+1:]...)
-
-	err := s.write()
-	if err != nil {
-		fatal("unable to remove "+t.Repository, err)
-	}
-
-	s.sync()
-}
-
-func (s spec) upgrade(t tool) {
-	idx := s.find(t)
-	if idx == -1 {
-		log(t.Repository + " is not yet installed (did you mean retool add?)")
-		return
-	}
-
-	s.Tools[idx].Commit = t.Commit
-
-	err := s.write()
-	if err != nil {
-		fatal("unable to remove "+t.Repository, err)
-	}
-
-	s.sync()
-}
-
 func (s spec) find(t tool) int {
 	for i, tt := range s.Tools {
 		if t.Repository == tt.Repository {
@@ -88,38 +40,6 @@ func (s spec) find(t tool) int {
 		}
 	}
 	return -1
-}
-
-func (s spec) sync() {
-	m := getManifest()
-	if m.outOfDate(s.Tools) {
-		log("syncing")
-
-		// Delete existing tools directory
-		cmd := exec.Command("rm", "-r", "-f", tooldir)
-		_, err := cmd.Output()
-		if err != nil {
-			fatalExec("failed to remove _tools ", err)
-		}
-
-		// Recreate the tools directory
-		ensureTooldir()
-
-		// Re-install everything
-		for _, t := range s.Tools {
-			err := install(t)
-			if err != nil {
-				fatalExec("failed to sync "+t.Repository, err)
-			}
-		}
-
-		// Write a fresh manifest
-		m.replace(s.Tools)
-		m.write()
-
-		// Delete unneccessary source files
-		s.cleanup()
-	}
 }
 
 func (s spec) cleanup() {
