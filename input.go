@@ -31,6 +31,7 @@ func parseArgs() (command string, t tool) {
 	case "remove":
 		assertArgLength(command, 3)
 		t.Repository = os.Args[2]
+		return "remove", t
 
 	case "do":
 		return "do", t

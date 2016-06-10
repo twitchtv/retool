@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 func main() {
 	ensureTooldir()
 	cmd, tool := parseArgs()
@@ -29,5 +31,7 @@ func main() {
 	case "do":
 		spec.sync()
 		do()
+	default:
+		fatal(fmt.Sprintf("unknown cmd %q", cmd), nil)
 	}
 }
