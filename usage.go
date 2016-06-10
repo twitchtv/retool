@@ -1,6 +1,6 @@
 package main
 
-var usage = `usage: retool (add | remove | upgrade | sync | generate | help)
+var usage = `usage: retool (add | remove | upgrade | sync | do | help)
 
 use retool with a subcommand:
 
@@ -8,11 +8,9 @@ add will add a tool
 remove will remove a tool
 upgrade will upgrade a tool
 sync will synchronize your tools with tools.json
-generate will call 'go generate ./...' using your installed tools
+do will run stuff using your installed tools
 
 help [command] will describe a command in more detail
-
-For all commands, passing -v will enable verbose mode.
 `
 
 var addUsage = `usage: retool add [repository] [commit]
