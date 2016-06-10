@@ -42,8 +42,8 @@ eg: retool remove github.com/tools/godep
 
 Remove will remove a tool from your tools.json. It won't delete the
 underlying repo from _tools, because it might be a dependency of some
-other tool. If you really want to clean things up, you can nuke _tools
-and it by calling 'rm -rf _tools && retool sync'.
+other tool. If you want to clean things up, retool sync will clear out
+unused dependencies.
 `
 
 var syncUsage = `usage: retool sync
