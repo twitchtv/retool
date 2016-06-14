@@ -38,12 +38,24 @@ func (m manifest) write() {
 	f.Write(bytes)
 }
 
-func (m manifest) outOfDate(ts []tool) bool {
+func (m manifest) outOfDate(ts []*tool) bool {
+	// Make a copy to check for elements in ts but not m
+	m2 := make(map[string]string)
+	for k, v := range m {
+		m2[k] = v
+	}
+
 	for _, t := range ts {
 		if v, ok := m[t.Repository]; !ok || v != t.Commit {
 			return true
 		}
+		delete(m2, t.Repository)
 	}
+
+	if len(m2) != 0 {
+		return true
+	}
+
 	return false
 }
 
