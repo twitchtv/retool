@@ -59,7 +59,7 @@ func (m manifest) outOfDate(ts []*tool) bool {
 	return false
 }
 
-func (m manifest) replace(ts []tool) {
+func (m manifest) replace(ts []*tool) {
 	for k := range m {
 		delete(m, k)
 	}

@@ -5,12 +5,14 @@ import (
 	"os"
 )
 
-func parseArgs() (command string, t tool) {
+func parseArgs() (command string, t *tool) {
 	if len(os.Args) < 2 {
 		printUsageAndExit("", 1)
 	}
 
 	command = os.Args[1]
+	t = new(tool)
+
 	switch command {
 	case "sync":
 		assertArgLength(command, 2)
@@ -19,13 +21,13 @@ func parseArgs() (command string, t tool) {
 	case "add":
 		assertArgLength(command, 4)
 		t.Repository = os.Args[2]
-		t.Commit = os.Args[3]
+		t.ref = os.Args[3]
 		return "add", t
 
 	case "upgrade":
 		assertArgLength(command, 4)
 		t.Repository = os.Args[2]
-		t.Commit = os.Args[3]
+		t.ref = os.Args[3]
 		return "upgrade", t
 
 	case "remove":

@@ -10,7 +10,7 @@ import (
 const specfile = "tools.json"
 
 type spec struct {
-	Tools []tool
+	Tools []*tool
 }
 
 func (s spec) write() error {
@@ -33,7 +33,7 @@ func (s spec) write() error {
 	return nil
 }
 
-func (s spec) find(t tool) int {
+func (s spec) find(t *tool) int {
 	for i, tt := range s.Tools {
 		if t.Repository == tt.Repository {
 			return i
@@ -77,5 +77,5 @@ func specExists() bool {
 }
 
 func writeBlankSpec() error {
-	return spec{[]tool{}}.write()
+	return spec{[]*tool{}}.write()
 }

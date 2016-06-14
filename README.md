@@ -13,9 +13,9 @@ Use it to generate code:
 retool do go generate ./...
 ```
 
-Upgrade your tools:
+Upgrade your tools to their latest version:
 ```sh
-retool upgrade github.com/golang/protobuf/protoc-gen-go 62e4364d64b32762febb61f2c88c0a29bc49a225
+retool upgrade github.com/golang/protobuf/protoc-gen-go origin/master
 ```
 
 Stop using that stupid tool you dont like anymore:
