@@ -1,6 +1,6 @@
 package main
 
-func (s spec) remove(t tool) {
+func (s spec) remove(t *tool) {
 	idx := s.find(t)
 	if idx == -1 {
 		fatal(t.Repository+" is not in tools.json", nil)
