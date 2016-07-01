@@ -21,7 +21,9 @@ Add will mark a repository as a tool you want to use. It will rewrite
 tools.json to record this fact. It will then fetch the repository,
 reset it to the desired commit, and install it to _tools/bin.
 
-Don't use 'master' for the commit. It kind of defeats the whole purpose.
+You can also use a symbolic reference, like 'master' or
+'origin/master' or 'origin/v1.0'. Retool will end up parsing this and
+storing the underlying SHA.
 `
 
 var upgradeUsage = `usage: retool upgrade [repository] [commit]
@@ -33,7 +35,9 @@ rewrite tools.json to record this fact. It will then fetch the
 repository, reset it to the desired commit, and install it to
 _tools/bin.
 
-Don't use 'master' for the commit. It kind of defeats the whole purpose.
+You can also use a symbolic reference, like 'master' or
+'origin/master' or 'origin/v1.0'. Retool will end up parsing this and
+storing the underlying SHA.
 `
 
 var removeUsage = `usage: retool remove [repository]
