@@ -17,11 +17,26 @@ func (s spec) sync() {
 		// Recreate the tools directory
 		ensureTooldir()
 
-		// Re-install everything
+		// Download everything to cache
 		for _, t := range s.Tools {
-			err := install(t)
+			err := download(t)
 			if err != nil {
 				fatalExec("failed to sync "+t.Repository, err)
+			}
+		}
+
+		// Copy the cache into the tools directory
+		cmd = exec.Command("cp", "-R", cacheDir+"/src", tooldir+"/src")
+		_, err = cmd.Output()
+		if err != nil {
+			fatalExec("failed to copy data from cache ", err)
+		}
+
+		// Install the packages
+		for _, t := range s.Tools {
+			err = install(t)
+			if err != nil {
+				fatalExec("go install "+t.Repository, err)
 			}
 		}
 

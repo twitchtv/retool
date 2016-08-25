@@ -15,30 +15,31 @@ func clean(pkgs []string) {
 
 	// A recursive helper to take a list of packages and find their dependencies deeply
 	found := map[string]struct{}{}
-	var resolve func([]string) []string
-	resolve = func(pkgs []string) []string {
+	var resolve func(string, []string) []string
+	resolve = func(parent string, pkgs []string) []string {
 		var r []string
 		for _, pkg := range pkgs {
 			if !strings.Contains(pkg, ".") {
 				continue
 			}
 
-			if _, ok := found[pkg]; ok {
+			p, err := build.Default.Import(pkg, path.Join(tooldir, "src", parent), 0)
+			if err != nil {
+				fatal(fmt.Sprintf("couldn't import package %q", pkg), err)
+			}
+
+			if _, ok := found[p.ImportPath]; ok {
 				continue
 			}
-			found[pkg] = struct{}{}
-			r = append(r, pkg)
 
-			p, err := build.Default.ImportDir(path.Join(tooldir, "src", pkg), 0)
-			if err != nil {
-				fatal(fmt.Sprintf("couldn't import package %q: %s", pkg), err)
-			}
-			r = append(r, resolve(p.Imports)...)
+			found[p.ImportPath] = struct{}{}
+			r = append(r, p.ImportPath)
+			r = append(r, resolve(p.ImportPath, p.Imports)...)
 		}
 		return r
 	}
 
-	keep := resolve(pkgs)
+	keep := resolve("", pkgs)
 	base := path.Join(tooldir, "src")
 
 	var toDelete []string

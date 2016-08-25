@@ -38,6 +38,9 @@ func parseArgs() (command string, t *tool) {
 	case "do":
 		return "do", t
 
+	case "clean":
+		return "clean", t
+
 	case "help":
 		assertArgLength(command, 3)
 		printUsageAndExit(os.Args[2], 0)
@@ -66,6 +69,8 @@ func printUsageAndExit(command string, exitCode int) {
 		fmt.Println(syncUsage)
 	case "do":
 		fmt.Println(doUsage)
+	case "clean":
+		fmt.Println(cleanUsage)
 	default:
 		fmt.Println(usage)
 	}
