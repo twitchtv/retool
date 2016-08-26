@@ -15,7 +15,7 @@ type tool struct {
 }
 
 func (t *tool) path() string {
-	return path.Join(tooldir, "src", t.Repository)
+	return path.Join(cacheDir, "src", t.Repository)
 }
 
 func (t *tool) executable() string {
@@ -44,14 +44,10 @@ func setEnvVar(cmd *exec.Cmd, key, val string) {
 	cmd.Env = env
 }
 
-func setGopath(cmd *exec.Cmd) {
-	setEnvVar(cmd, "GOPATH", tooldir)
-}
-
 func get(t *tool) error {
 	log("downloading " + t.Repository)
 	cmd := exec.Command("go", "get", "-d", t.Repository)
-	setGopath(cmd)
+	setEnvVar(cmd, "GOPATH", cacheDir)
 	_, err := cmd.Output()
 	return err
 }
@@ -84,15 +80,7 @@ func setVersion(t *tool) error {
 	return err
 }
 
-func installBin(t *tool) error {
-	log("installing " + t.Repository)
-	cmd := exec.Command("go", "install", t.Repository)
-	setGopath(cmd)
-	_, err := cmd.Output()
-	return err
-}
-
-func install(t *tool) error {
+func download(t *tool) error {
 	err := get(t)
 	if err != nil {
 		fatalExec("go get -d "+t.Repository, err)
@@ -103,10 +91,13 @@ func install(t *tool) error {
 		fatalExec("git checkout "+t.Commit, err)
 	}
 
-	err = installBin(t)
-	if err != nil {
-		fatalExec("go install "+t.Repository, err)
-	}
-
 	return nil
+}
+
+func install(t *tool) error {
+	log("installing " + t.Repository)
+	cmd := exec.Command("go", "install", t.Repository)
+	setEnvVar(cmd, "GOPATH", tooldir)
+	_, err := cmd.Output()
+	return err
 }

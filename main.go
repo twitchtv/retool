@@ -1,6 +1,27 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+	"os/user"
+	"path/filepath"
+)
+
+var cacheDir = ""
+
+func init() {
+	u, err := user.Current()
+	if err == nil && u.HomeDir != "" {
+		cacheDir = filepath.Join(u.HomeDir, ".retool")
+	} else {
+		cwd, err := os.Getwd()
+		if err == nil {
+			cacheDir = filepath.Join(cwd, ".retool")
+		} else {
+			cacheDir = ".retool"
+		}
+	}
+}
 
 func main() {
 	ensureTooldir()
@@ -31,6 +52,8 @@ func main() {
 	case "do":
 		spec.sync()
 		do()
+	case "clean":
+		os.RemoveAll(cacheDir)
 	default:
 		fatal(fmt.Sprintf("unknown cmd %q", cmd), nil)
 	}

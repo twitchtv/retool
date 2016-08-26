@@ -1,6 +1,6 @@
 package main
 
-var usage = `usage: retool (add | remove | upgrade | sync | do | help)
+var usage = `usage: retool (add | remove | upgrade | sync | do | clean | help)
 
 use retool with a subcommand:
 
@@ -9,6 +9,7 @@ remove will remove a tool
 upgrade will upgrade a tool
 sync will synchronize your tools with tools.json
 do will run stuff using your installed tools
+clean will delete the repo cache stored at ~/.retool
 
 help [command] will describe a command in more detail
 `
@@ -62,5 +63,14 @@ execute a command with the tools installed in _tools.
 
 This is just
   retool sync && PATH=$PWD/_tools/bin:$PATH [command and args]
+That works too.
+`
+
+var cleanUsage = `usage: retool clean
+
+retool clean will delete the repo cache stored at ~/.retool
+
+This is just
+  rm -rf ~/.retool
 That works too.
 `
