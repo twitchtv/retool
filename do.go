@@ -7,10 +7,13 @@ import (
 	"strings"
 )
 
-func setPath(cmd *exec.Cmd) {
+func setPath() (unset func()) {
 	prevpath := os.Getenv("PATH")
 	newPath := path.Join(tooldir, "bin") + ":" + prevpath
-	setEnvVar(cmd, "PATH", newPath)
+	os.Setenv("PATH", newPath)
+	return func() {
+		os.Setenv("PATH", prevpath)
+	}
 }
 
 func trimArgs() []string {
@@ -28,9 +31,10 @@ func do() {
 		fatal("no command passed to retool do", nil)
 	}
 
-	cmd := exec.Command(args[0], args[1:]...)
+	resetPath := setPath()
+	defer resetPath()
 
-	setPath(cmd)
+	cmd := exec.Command(args[0], args[1:]...)
 
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = os.Stderr
