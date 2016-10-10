@@ -55,7 +55,7 @@ func main() {
 		spec.sync()
 	case "do":
 		spec.sync()
-		do(tool)
+		do()
 	case "clean":
 		os.RemoveAll(cacheDir)
 	default:

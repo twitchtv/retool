@@ -7,7 +7,6 @@ import (
 	"strings"
 )
 
-// XXX: This does not actually set the return value ('unset').
 func setPath() (unset func()) {
 	prevpath := os.Getenv("PATH")
 	newPath := path.Join(toolDirPath, "bin") + ":" + prevpath
@@ -17,7 +16,7 @@ func setPath() (unset func()) {
 	}
 }
 
-func do(t *tool) {
+func do() {
 	args := positionalArgs
 	if len(args) == 0 {
 		fatal("no command passed to retool do", nil)
