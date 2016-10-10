@@ -1,0 +1,10 @@
+{
+    "project_id": "common-retool",
+    "history.immutable": true,
+    "repository.callsign": "retool",
+    "phabricator.uri": "https://phabricator.internal.justin.tv",
+    "load": [
+        "../../github.com/kalbasit/arcanist-go"
+    ],
+    "unit.engine": "GoTestEngine"
+}

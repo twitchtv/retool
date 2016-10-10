@@ -1,0 +1,10 @@
+{
+    "linters": {
+        "go": {
+            "type": "golint",
+            "bin": ["./_tools/bin/golint", "golint"],
+            "include": "(\\.go$)",
+            "exclude": ["(^vendor/)", "(\\.pb\\.go$)"]
+        }
+    }
+}
