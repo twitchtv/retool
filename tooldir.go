@@ -1,40 +1,71 @@
 package main
 
 import (
+	"flag"
 	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
-var tooldir string
+const (
+	toolDirName = "_tools"
+)
 
-func init() {
+var (
+	baseDir = flag.String("base-dir", "",
+		"Path of project root.  If not specified, the working directory is used.")
+	toolDir = flag.String("tool-dir", "",
+		"Path where tools are stored.  The default value is the subdirectory of -base-dir named '_tools'.")
+
+	// These globals are set by ensureTooldir() after factoring in the flags above.
+	baseDirPath string
+	toolDirPath string
+)
+
+func ensureTooldir() error {
+	var err error
+
 	cwd, err := os.Getwd()
 	if err != nil {
-		fatal("cannot get current working directory: %s", err)
+		return errors.Wrap(err, "failed to get working directory")
 	}
-	tooldir = path.Join(cwd, "_tools")
-}
 
-func ensureTooldir() {
-	stat, err := os.Stat(tooldir)
+	baseDirPath = *baseDir
+	if baseDirPath == "" {
+		baseDirPath = cwd
+	}
+
+	toolDirPath = *toolDir
+	if toolDirPath == "" {
+		toolDirPath = filepath.Join(baseDirPath, toolDirName)
+	}
+
+	verbosef("base dir: %v\n", baseDirPath)
+	verbosef("tool dir: %v\n", toolDirPath)
+
+	stat, err := os.Stat(toolDirPath)
 	switch {
 	case os.IsNotExist(err):
-		err = os.Mkdir(tooldir, 0777)
+		err = os.Mkdir(toolDirPath, 0777)
 		if err != nil {
-			fatal("unable to create tooldir", err)
+			return errors.Wrap(err, "unable to create tooldir")
 		}
 	case err != nil:
-		fatal("unable to stat tool directory: %s", err)
+		return errors.Wrap(err, "unable to stat tool directory")
 	case !stat.IsDir():
-		fatal("%s already exists, but it is not a directory. This is where tools would go, so giving up.", nil)
+		return errors.New("tool directory already exists, but it is not a directory")
 	}
 
-	err = ioutil.WriteFile(path.Join(tooldir, ".gitignore"), gitignore, 0664)
+	err = ioutil.WriteFile(path.Join(toolDirPath, ".gitignore"), gitignore, 0664)
 	if err != nil {
-		fatal("unable to update .gitignore", err)
+		errors.Wrap(err, "unable to update .gitignore")
 	}
+
+	return nil
 }
 
 var gitignore = []byte(strings.TrimLeft(`
