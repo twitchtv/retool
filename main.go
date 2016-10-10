@@ -27,7 +27,7 @@ func init() {
 func main() {
 	flag.Parse()
 	if err := ensureTooldir(); err != nil {
-		fatal("failed to locate or create tool directory: %v", err)
+		fatal("failed to locate or create tool directory", err)
 	}
 	cmd, tool := parseArgs()
 
