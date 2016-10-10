@@ -18,7 +18,7 @@ func setPath() (unset func()) {
 }
 
 func do(t *tool) {
-	args := t.PositionalArgs
+	args := positionalArgs
 	if len(args) == 0 {
 		fatal("no command passed to retool do", nil)
 	}

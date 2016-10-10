@@ -14,8 +14,6 @@ type tool struct {
 	Repository string // eg "github.com/tools/godep"
 	Commit     string // eg "3020345802e4bff23902cfc1d19e90a79fae714e"
 	ref        string // eg "origin/master"
-
-	PositionalArgs []string
 }
 
 func (t *tool) path() string {

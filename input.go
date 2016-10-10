@@ -8,6 +8,9 @@ import (
 
 var (
 	verboseFlag = flag.Bool("verbose", false, "Enable more detailed output that may be helpful for troubleshooting.")
+
+	// TODO: Refactor so that this global state is not necessary.
+	positionalArgs []string
 )
 
 // TODO: Will this bother errcheck?
@@ -32,7 +35,7 @@ func parseArgs() (command string, t *tool) {
 	command = args[0]
 	args = args[1:]
 	t = new(tool)
-	t.PositionalArgs = args
+	positionalArgs = args
 
 	switch command {
 	case "sync":
