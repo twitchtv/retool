@@ -51,11 +51,6 @@ func getRepoRoot() (string, error) {
 func ensureTooldir() error {
 	var err error
 
-	cwd, err := os.Getwd()
-	if err != nil {
-		return errors.Wrap(err, "failed to get working directory")
-	}
-
 	baseDirPath = *baseDir
 	if baseDirPath == "" {
 		repoRootPath, err := getRepoRoot()
@@ -63,7 +58,10 @@ func ensureTooldir() error {
 			return errors.Wrap(err, "failed to check for enclosing git repository")
 		}
 		if repoRootPath == "" {
-			baseDirPath = cwd
+			baseDirPath, err = os.Getwd()
+			if err != nil {
+				return errors.Wrap(err, "failed to get working directory")
+			}
 		} else {
 			baseDirPath = repoRootPath
 		}
