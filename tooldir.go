@@ -57,7 +57,7 @@ func ensureTooldir() error {
 	case err != nil:
 		return errors.Wrap(err, "unable to stat tool directory")
 	case !stat.IsDir():
-		return errors.New("tool directory already exists, but it is not a directory")
+		return errors.New("tool directory already exists, but it is not a directory; you can use -tool-dir to change where tools are saved")
 	}
 
 	err = ioutil.WriteFile(path.Join(toolDirPath, ".gitignore"), gitignore, 0664)
