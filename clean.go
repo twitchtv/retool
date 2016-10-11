@@ -11,7 +11,7 @@ import (
 
 func clean(pkgs []string) {
 	// This is rude but shouldn't be an issue...
-	build.Default.GOPATH = tooldir
+	build.Default.GOPATH = toolDirPath
 
 	// A recursive helper to take a list of packages and find their dependencies deeply
 	found := map[string]struct{}{}
@@ -23,7 +23,7 @@ func clean(pkgs []string) {
 				continue
 			}
 
-			p, err := build.Default.Import(pkg, path.Join(tooldir, "src", parent), 0)
+			p, err := build.Default.Import(pkg, filepath.Join(toolDirPath, "src", parent), 0)
 			if err != nil {
 				fatal(fmt.Sprintf("couldn't import package %q", pkg), err)
 			}
@@ -40,7 +40,7 @@ func clean(pkgs []string) {
 	}
 
 	keep := resolve("", pkgs)
-	base := path.Join(tooldir, "src")
+	base := path.Join(toolDirPath, "src")
 
 	var toDelete []string
 	err := filepath.Walk(base, func(path string, info os.FileInfo, err error) error {

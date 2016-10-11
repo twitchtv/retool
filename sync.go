@@ -1,6 +1,9 @@
 package main
 
-import "os/exec"
+import (
+	"os/exec"
+	"path/filepath"
+)
 
 func (s spec) sync() {
 	m := getManifest()
@@ -8,7 +11,7 @@ func (s spec) sync() {
 		log("syncing")
 
 		// Delete existing tools directory
-		cmd := exec.Command("rm", "-r", "-f", tooldir)
+		cmd := exec.Command("rm", "-r", "-f", toolDirPath)
 		_, err := cmd.Output()
 		if err != nil {
 			fatalExec("failed to remove _tools ", err)
@@ -26,7 +29,7 @@ func (s spec) sync() {
 		}
 
 		// Copy the cache into the tools directory
-		cmd = exec.Command("cp", "-R", cacheDir+"/src", tooldir+"/src")
+		cmd = exec.Command("cp", "-R", filepath.Join(cacheDir, "src"), filepath.Join(toolDirPath, "src"))
 		_, err = cmd.Output()
 		if err != nil {
 			fatalExec("failed to copy data from cache ", err)

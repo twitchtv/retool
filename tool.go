@@ -6,6 +6,8 @@ import (
 	"os/exec"
 	"path"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 type tool struct {
@@ -49,6 +51,9 @@ func get(t *tool) error {
 	cmd := exec.Command("go", "get", "-d", t.Repository)
 	setEnvVar(cmd, "GOPATH", cacheDir)
 	_, err := cmd.Output()
+	if err != nil {
+		return errors.Wrap(err, "failed to 'go get' tool")
+	}
 	return err
 }
 
@@ -77,6 +82,9 @@ func setVersion(t *tool) error {
 	cmd = exec.Command("git", "checkout", t.Commit)
 	cmd.Dir = t.path()
 	_, err = cmd.Output()
+	if err != nil {
+		return errors.Wrap(err, "failed to 'git checkout' tool")
+	}
 	return err
 }
 
@@ -97,7 +105,10 @@ func download(t *tool) error {
 func install(t *tool) error {
 	log("installing " + t.Repository)
 	cmd := exec.Command("go", "install", t.Repository)
-	setEnvVar(cmd, "GOPATH", tooldir)
+	setEnvVar(cmd, "GOPATH", toolDirPath)
 	_, err := cmd.Output()
+	if err != nil {
+		return errors.Wrap(err, "failed to 'go install' tool")
+	}
 	return err
 }

@@ -7,6 +7,10 @@
     {
       "Repository": "github.com/golang/protobuf/protoc-gen-go",
       "Commit": "2fea9e168bab814ca0c6e292a6be164f624fc6ca"
+    },
+    {
+      "Repository": "github.com/golang/lint",
+      "Commit": "55ae771cfa82f3846897c972e262ed5d54d47d48"
     }
   ]
 }
