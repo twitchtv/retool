@@ -8,6 +8,7 @@ import (
 
 var (
 	verboseFlag = flag.Bool("verbose", false, "Enable more detailed output that may be helpful for troubleshooting.")
+	forkFlag    = flag.String("f", "", "Use a fork of the repository rather than the default upstream")
 
 	// TODO: Refactor so that this global state is not necessary.
 	positionalArgs []string
@@ -46,12 +47,14 @@ func parseArgs() (command string, t *tool) {
 		assertArgLength(args, command, 2)
 		t.Repository = args[0]
 		t.ref = args[1]
+		t.Fork = *forkFlag
 		return "add", t
 
 	case "upgrade":
 		assertArgLength(args, command, 2)
 		t.Repository = args[0]
 		t.ref = args[1]
+		t.Fork = *forkFlag
 		return "upgrade", t
 
 	case "remove":

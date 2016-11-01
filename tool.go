@@ -14,6 +14,7 @@ type tool struct {
 	Repository string // eg "github.com/tools/godep"
 	Commit     string // eg "3020345802e4bff23902cfc1d19e90a79fae714e"
 	ref        string // eg "origin/master"
+	Fork       string `json:"Fork,omitempty"` // eg "code.jusin.tv/twitch/godep"
 }
 
 func (t *tool) path() string {
@@ -58,6 +59,20 @@ func get(t *tool) error {
 }
 
 func setVersion(t *tool) error {
+	// If we're using a fork, add it
+	if t.Fork != "" {
+		cmd := exec.Command("git", "remote", "rm", "fork")
+		cmd.Dir = t.path()
+		cmd.Output()
+
+		cmd = exec.Command("git", "remote", "add", "-f", "fork", t.Fork)
+		cmd.Dir = t.path()
+		_, err := cmd.Output()
+		if err != nil {
+			return err
+		}
+	}
+
 	log("setting version for " + t.Repository)
 	cmd := exec.Command("git", "fetch")
 	cmd.Dir = t.path()
