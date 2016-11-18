@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"os/user"
@@ -24,7 +25,10 @@ func init() {
 }
 
 func main() {
-	ensureTooldir()
+	flag.Parse()
+	if err := ensureTooldir(); err != nil {
+		fatal("failed to locate or create tool directory", err)
+	}
 	cmd, tool := parseArgs()
 
 	if !specExists() {

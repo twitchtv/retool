@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"os"
-	"path"
+	"path/filepath"
 )
 
 const manifestFile = "manifest.json"
@@ -13,7 +13,7 @@ type manifest map[string]string
 func getManifest() manifest {
 	m := manifest{}
 
-	file, err := os.Open(path.Join(tooldir, manifestFile))
+	file, err := os.Open(filepath.Join(toolDirPath, manifestFile))
 	if err != nil {
 		return m
 	}
@@ -24,7 +24,7 @@ func getManifest() manifest {
 }
 
 func (m manifest) write() {
-	f, err := os.Create(path.Join(tooldir, manifestFile))
+	f, err := os.Create(filepath.Join(toolDirPath, manifestFile))
 	if err != nil {
 		return
 	}

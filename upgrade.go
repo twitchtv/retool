@@ -7,8 +7,7 @@ func (s spec) upgrade(t *tool) {
 		return
 	}
 
-	s.Tools[idx].ref = t.ref
-	s.Tools[idx].Commit = t.Commit
+	s.Tools[idx] = t
 
 	s.sync()
 

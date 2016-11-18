@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 )
 
 // Filename to read/write the spec data.
@@ -14,7 +15,9 @@ type spec struct {
 }
 
 func (s spec) write() error {
-	f, err := os.Create(specfile)
+	specfilePath := filepath.Join(baseDirPath, specfile)
+
+	f, err := os.Create(specfilePath)
 	if err != nil {
 		return fmt.Errorf("unable to open %s: %s", specfile, err)
 	}
@@ -51,7 +54,9 @@ func (s spec) cleanup() {
 }
 
 func read() (spec, error) {
-	file, err := os.Open(specfile)
+	specfilePath := filepath.Join(baseDirPath, specfile)
+
+	file, err := os.Open(specfilePath)
 	if err != nil {
 		return spec{}, fmt.Errorf("unable to open spec file at %s: %s", specfile, err)
 	}
@@ -66,7 +71,9 @@ func read() (spec, error) {
 }
 
 func specExists() bool {
-	_, err := os.Stat(specfile)
+	specfilePath := filepath.Join(baseDirPath, specfile)
+
+	_, err := os.Stat(specfilePath)
 	if os.IsNotExist(err) {
 		return false
 	}

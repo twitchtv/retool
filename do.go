@@ -7,31 +7,24 @@ import (
 	"strings"
 )
 
-func setPath(cmd *exec.Cmd) {
+func setPath() (unset func()) {
 	prevpath := os.Getenv("PATH")
-	newPath := path.Join(tooldir, "bin") + ":" + prevpath
-	setEnvVar(cmd, "PATH", newPath)
-}
-
-func trimArgs() []string {
-	for i := 0; i < len(os.Args)-2; i++ {
-		if os.Args[i] == "retool" && os.Args[i+1] == "do" {
-			return os.Args[i+2:]
-		}
+	newPath := path.Join(toolDirPath, "bin") + ":" + prevpath
+	os.Setenv("PATH", newPath)
+	return func() {
+		os.Setenv("PATH", prevpath)
 	}
-	return nil
 }
 
 func do() {
-	args := trimArgs()
-	if args == nil {
+	args := positionalArgs
+	if len(args) == 0 {
 		fatal("no command passed to retool do", nil)
 	}
 
+	defer setPath()()
+
 	cmd := exec.Command(args[0], args[1:]...)
-
-	setPath(cmd)
-
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
