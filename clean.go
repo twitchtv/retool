@@ -68,7 +68,7 @@ func clean(pkgs []string) {
 			isGo := strings.HasSuffix(path, ".go")
 			isAssembly := strings.HasSuffix(path, ".s")
 			isTest := strings.HasSuffix(path, "_test.go")
-			if !keptPkg || !isGo || !isAssembly || isTest {
+			if !keptPkg || !(isGo || isAssembly) || isTest {
 				toDelete = append(toDelete, path)
 			}
 			return nil
