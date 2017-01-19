@@ -4,7 +4,7 @@
 
 Add a tool dependency:
 ```sh
-retool add github.com/golang/protobuf/protoc-gen-go 2fea9e168bab814ca0c6e292a6be164f624fc6ca
+retool add github.com/golang/protobuf/protoc-gen-go origin/master
 ```
 
 Use it to generate code:
