@@ -1,12 +1,11 @@
 # Retool: Make Code Generation Great Again #
 
-## hao git ##
+## wat do ##
 
+Install retool:
 ```sh
 go get code.justin.tv/common/retool
 ```
-
-## wat do ##
 
 Add a tool dependency:
 ```sh
