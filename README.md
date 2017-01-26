@@ -3,7 +3,7 @@
 ## hao git ##
 
 ```sh
-go get github.com/golang/common/retool
+go get code.justin.tv/common/retool
 ```
 
 ## wat do ##
