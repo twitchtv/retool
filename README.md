@@ -1,5 +1,11 @@
 # Retool: Make Code Generation Great Again #
 
+## hao git ##
+
+```sh
+go get github.com/golang/protobuf/protoc-gen-go
+```
+
 ## wat do ##
 
 Add a tool dependency:
