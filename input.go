@@ -70,6 +70,10 @@ func parseArgs() (command string, t *tool) {
 		assertArgLength(args, command, 0)
 		return "clean", t
 
+	case "build":
+		assertArgLength(args, command, 0)
+		return "build", t
+
 	case "help":
 		assertArgLength(args, command, 1)
 		printUsageAndExit(args[1], 0)

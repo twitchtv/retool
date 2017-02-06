@@ -1,13 +1,14 @@
 package main
 
-var usage = `usage: retool (add | remove | upgrade | sync | do | clean | help)
+var usage = `usage: retool (add | remove | upgrade | sync | do | clean | build | help)
 
 use retool with a subcommand:
 
 add will add a tool
 remove will remove a tool
 upgrade will upgrade a tool
-sync will synchronize your tools with tools.json
+sync will synchronize your _tools with tools.json, downloading if necessary
+build will compile all the tools in _tools
 do will run stuff using your installed tools
 clean will delete the repo cache stored at ~/.retool
 
@@ -73,4 +74,11 @@ retool clean will delete the repo cache stored at ~/.retool
 This is just
   rm -rf ~/.retool
 That works too.
+`
+
+var buildUsage = `usage: retool build
+
+retool build will compile all the tools listed in tools.json, obeying whatever is currently
+downloaded into _tools. It will not do additional network calls. This is typically useful for
+compiling vendored tools so you can use them inside isolated environments.
 `

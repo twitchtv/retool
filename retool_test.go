@@ -10,8 +10,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-// build builds retool in a temporary directory and returns the path to the built binary
-func build() (string, error) {
+// buildRetool builds retool in a temporary directory and returns the path to the built binary
+func buildRetool() (string, error) {
 	dir, err := ioutil.TempDir("", "")
 	if err != nil {
 		return "", errors.Wrap(err, "unable to create temporary build directory")
@@ -25,39 +25,76 @@ func build() (string, error) {
 	return output, nil
 }
 
-func TestRetoolCachePollution(t *testing.T) {
-	retool, err := build()
+func TestRetool(t *testing.T) {
+	retool, err := buildRetool()
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(retool)
 
-	dir, err := ioutil.TempDir("", "")
-	if err != nil {
-		t.Fatalf("unable to make temp dir: %s", err)
-	}
-	defer os.RemoveAll(dir)
+	t.Run("cache pollution", func(t *testing.T) {
+		dir, err := ioutil.TempDir("", "")
+		if err != nil {
+			t.Fatalf("unable to make temp dir: %s", err)
+		}
+		defer os.RemoveAll(dir)
 
-	// This should fail because this version of mockery has an import line that points to uber's
-	// internal repo, which can't be reached:
-	cmd := exec.Command(retool, "-base-dir", dir, "add",
-		"github.com/vektra/mockery/cmd/mockery", "d895b9fcc32730719faaccd7840ad7277c94c2d0",
-	)
-	cmd.Dir = dir
-	_, err = cmd.Output()
-	if err == nil {
-		t.Fatal("expected error when adding mockery at broken commit d895b9, but got no error")
-	}
+		// This should fail because this version of mockery has an import line that points to uber's
+		// internal repo, which can't be reached:
+		cmd := exec.Command(retool, "-base-dir", dir, "add",
+			"github.com/vektra/mockery/cmd/mockery", "d895b9fcc32730719faaccd7840ad7277c94c2d0",
+		)
+		cmd.Dir = dir
+		_, err = cmd.Output()
+		if err == nil {
+			t.Fatal("expected error when adding mockery at broken commit d895b9, but got no error")
+		}
 
-	// Now, without cleaning the cache, try again on a healthy commit. In
-	// ff9a1fda7478ede6250ee3c7e4ce32dc30096236 of retool and earlier, this would still fail because
-	// the cache would be polluted with a bad source tree.
-	cmd = exec.Command(retool, "-base-dir", dir, "add",
-		"github.com/vektra/mockery/cmd/mockery", "origin/master",
-	)
-	cmd.Dir = dir
-	_, err = cmd.Output()
-	if err != nil {
-		t.Fatalf("expected no error when adding mockery at broken commit d895b9, but got this:\n%s", string(err.(*exec.ExitError).Stderr))
-	}
+		// Now, without cleaning the cache, try again on a healthy commit. In
+		// ff9a1fda7478ede6250ee3c7e4ce32dc30096236 of retool and earlier, this would still fail because
+		// the cache would be polluted with a bad source tree.
+		cmd = exec.Command(retool, "-base-dir", dir, "add",
+			"github.com/vektra/mockery/cmd/mockery", "origin/master",
+		)
+		cmd.Dir = dir
+		_, err = cmd.Output()
+		if err != nil {
+			t.Fatalf("expected no error when adding mockery at broken commit d895b9, but got this:\n%s", string(err.(*exec.ExitError).Stderr))
+		}
+	})
+
+	t.Run("build", func(t *testing.T) {
+		dir, err := ioutil.TempDir("", "")
+		if err != nil {
+			t.Fatalf("unable to make temp dir: %s", err)
+		}
+		defer os.RemoveAll(dir)
+
+		cmd := exec.Command(retool, "-base-dir", dir, "add",
+			"code.justin.tv/common/retool", "origin/master",
+		)
+		cmd.Dir = dir
+		_, err = cmd.Output()
+		if err != nil {
+			t.Fatalf("expected no errors when using retool add, have this:\n%s", string(err.(*exec.ExitError).Stderr))
+		}
+
+		// Suppose we only have _tools/src available. Does `retool build` work?
+		os.RemoveAll(filepath.Join(dir, "_tools", "bin"))
+		os.RemoveAll(filepath.Join(dir, "_tools", "pkg"))
+		os.RemoveAll(filepath.Join(dir, "_tools", "manifest.json"))
+
+		cmd = exec.Command(retool, "-base-dir", dir, "build")
+		cmd.Dir = dir
+		_, err = cmd.Output()
+		if err != nil {
+			t.Fatalf("expected no errors when using retool build, have this:\n%s", string(err.(*exec.ExitError).Stderr))
+		}
+
+		// Now the binary should be installed
+		_, err = os.Stat(filepath.Join(dir, "_tools", "bin", "retool"))
+		if err != nil {
+			t.Fatalf("unable to stat _tools/bin/retool after calling retool build: %s", err)
+		}
+	})
 }

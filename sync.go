@@ -36,16 +36,7 @@ func (s spec) sync() {
 		}
 
 		// Install the packages
-		for _, t := range s.Tools {
-			err = install(t)
-			if err != nil {
-				fatalExec("go install "+t.Repository, err)
-			}
-		}
-
-		// Write a fresh manifest
-		m.replace(s.Tools)
-		m.write()
+		s.build()
 
 		// Delete unneccessary source files
 		s.cleanup()

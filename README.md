@@ -28,6 +28,12 @@ Stop using that stupid tool you dont like anymore:
 retool remove github.com/tools/godep
 ```
 
+Compile all the tools that other people have vendored in a project:
+```sh
+# compiles everything without using the network
+retool build
+```
+
 Stay in sync:
 ```sh
 # makes sure your tools match tools.json
