@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+
+	"github.com/pkg/errors"
 )
 
 func log(msg string) {
@@ -20,7 +22,7 @@ func fatal(msg string, err error) {
 }
 
 func fatalExec(cmd string, err error) {
-	if exErr, ok := err.(*exec.ExitError); ok {
+	if exErr, ok := errors.Cause(err).(*exec.ExitError); ok {
 		fatal(fmt.Sprintf("execution error on %q: %s", cmd, exErr.Stderr), err)
 	} else {
 		fatal(fmt.Sprintf("execution error on %q", cmd), err)
