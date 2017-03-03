@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 )
 
+const version = "v1.0"
+
 var cacheDir = ""
 
 func init() {
@@ -45,6 +47,8 @@ func main() {
 	}
 
 	switch cmd {
+	case "version":
+		fmt.Fprintf(os.Stdout, "retool %s", version)
 	case "add":
 		spec.add(tool)
 	case "upgrade":

@@ -125,6 +125,7 @@ do will run stuff using your installed tools
 clean will delete the repo cache stored at ~/.retool
 
 help [command] will describe a command in more detail
+version will print the installed version of retool
 `
 
 const addUsage = `usage: retool add [repository] [commit]
