@@ -51,7 +51,7 @@ func setEnvVar(cmd *exec.Cmd, key, val string) {
 func get(t *tool) error {
 	// If the repo is already downloaded to the cache, then we can exit early
 	if _, err := os.Stat(filepath.Join(cacheDir, "src", t.Repository)); err == nil {
-		log(t.Repository + "already exists, skipping 'get' step")
+		log(t.Repository + " already exists, skipping 'get' step")
 		return nil
 	}
 
