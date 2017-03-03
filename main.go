@@ -51,6 +51,8 @@ func main() {
 		spec.upgrade(tool)
 	case "remove":
 		spec.remove(tool)
+	case "build":
+		spec.build()
 	case "sync":
 		spec.sync()
 	case "do":

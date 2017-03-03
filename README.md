@@ -28,6 +28,12 @@ Stop using that stupid tool you dont like anymore:
 retool remove github.com/tools/godep
 ```
 
+Compile all the tools that other people have vendored in a project:
+```sh
+# compiles everything without using the network
+retool build
+```
+
 Stay in sync:
 ```sh
 # makes sure your tools match tools.json
@@ -111,3 +117,11 @@ you use `retool do go generate ./...` to use your sweet, vendored
 tools. This really just calls `PATH=$PWD/_tools/bin:PATH go generate
 ./...`; if you want to do anything fancy, you can feel free to use
 that path too.
+
+## contributing to retool ##
+
+Any pull requests are extremely welcome! If you run into problems or have questions, please raise a
+github issue!
+
+Retool's tests are mostly integration tests. They require a working Go compiler, a working version
+of git, and network access.
