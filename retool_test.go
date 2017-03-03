@@ -26,6 +26,9 @@ func buildRetool() (string, error) {
 }
 
 func TestRetool(t *testing.T) {
+	// These integration tests require more than most go tests: they require a go compiler to build
+	// retool, a working version of git to perform retool's operations, and network access to do the
+	// git fetches.
 	retool, err := buildRetool()
 	if err != nil {
 		t.Fatal(err)
