@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -48,6 +49,12 @@ func setEnvVar(cmd *exec.Cmd, key, val string) {
 }
 
 func get(t *tool) error {
+	// If the repo is already downloaded to the cache, then we can exit early
+	if _, err := os.Stat(filepath.Join(cacheDir, "src", t.Repository)); err == nil {
+		log(t.Repository + "already exists, skipping 'get' step")
+		return nil
+	}
+
 	log("downloading " + t.Repository)
 	cmd := exec.Command("go", "get", "-d", t.Repository)
 	setEnvVar(cmd, "GOPATH", cacheDir)
