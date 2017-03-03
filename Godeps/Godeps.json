@@ -1,7 +1,7 @@
 {
 	"ImportPath": "code.justin.tv/common/retool",
-	"GoVersion": "go1.7",
-	"GodepVersion": "v74",
+	"GoVersion": "go1.8",
+	"GodepVersion": "v76",
 	"Packages": [
 		"./..."
 	],
