@@ -33,6 +33,11 @@ func main() {
 	}
 	cmd, tool := parseArgs()
 
+	if cmd == "version" {
+		fmt.Fprintf(os.Stdout, "retool %s", version)
+		os.Exit(0)
+	}
+
 	if !specExists() {
 		if cmd == "add" {
 			writeBlankSpec()
@@ -47,8 +52,6 @@ func main() {
 	}
 
 	switch cmd {
-	case "version":
-		fmt.Fprintf(os.Stdout, "retool %s", version)
 	case "add":
 		spec.add(tool)
 	case "upgrade":

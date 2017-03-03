@@ -39,6 +39,10 @@ func parseArgs() (command string, t *tool) {
 	positionalArgs = args
 
 	switch command {
+	case "version":
+		assertArgLength(args, command, 0)
+		return "version", t
+
 	case "sync":
 		assertArgLength(args, command, 0)
 		return "sync", t

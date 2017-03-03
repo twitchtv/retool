@@ -1,6 +1,7 @@
-package main_test
+package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -66,6 +67,25 @@ func TestRetool(t *testing.T) {
 		}
 	})
 
+	t.Run("version", func(t *testing.T) {
+		dir, err := ioutil.TempDir("", "")
+		if err != nil {
+			t.Fatalf("unable to make temp dir: %s", err)
+		}
+		defer os.RemoveAll(dir)
+
+		// Should work even in a directory without tools.json
+		cmd := exec.Command(retool, "version")
+		cmd.Dir = dir
+		out, err := cmd.Output()
+		if err != nil {
+			t.Fatalf("expected no errors when using retool version, have this:\n%s", string(out))
+		}
+		if want := fmt.Sprintf("retool %s", version); string(out) != want {
+			t.Errorf("have=%q, want=%q", string(out), want)
+		}
+	})
+
 	t.Run("build", func(t *testing.T) {
 		dir, err := ioutil.TempDir("", "")
 		if err != nil {
@@ -100,4 +120,5 @@ func TestRetool(t *testing.T) {
 			t.Fatalf("unable to stat _tools/bin/retool after calling retool build: %s", err)
 		}
 	})
+
 }
