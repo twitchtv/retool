@@ -4,7 +4,7 @@
 
 Install retool:
 ```sh
-go get code.justin.tv/common/retool
+go get github.com/retool/retool
 ```
 
 Add a tool dependency:
@@ -92,10 +92,6 @@ retool records the versions of tools you want in a file,
 ```json
 {
   "Tools": [
-    {
-      "Repository": "code.justin.tv/common/twirp/protoc-gen-twirp",
-      "Commit": "24eb49ba0f7cd692f60f11af1cba4a515ab64e06"
-    },
     {
       "Repository": "github.com/golang/protobuf/protoc-gen-go",
       "Commit": "2fea9e168bab814ca0c6e292a6be164f624fc6ca"

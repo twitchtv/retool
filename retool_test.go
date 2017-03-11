@@ -94,7 +94,7 @@ func TestRetool(t *testing.T) {
 		defer os.RemoveAll(dir)
 
 		cmd := exec.Command(retool, "-base-dir", dir, "add",
-			"code.justin.tv/common/retool", "origin/master",
+			"github.com/twitchtv/retool", "origin/master",
 		)
 		cmd.Dir = dir
 		_, err = cmd.Output()

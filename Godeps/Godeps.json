@@ -1,5 +1,5 @@
 {
-	"ImportPath": "code.justin.tv/common/retool",
+	"ImportPath": "github.com/twitchtv/retool",
 	"GoVersion": "go1.8",
 	"GodepVersion": "v76",
 	"Packages": [
