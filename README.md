@@ -36,7 +36,7 @@ The expected workflow is something like this:
 
 Install retool:
 ```sh
-go get github.com/retool/retool
+go get github.com/twitchtv/retool
 ```
 
 Add a tool dependency:
