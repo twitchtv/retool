@@ -5,4 +5,4 @@ go:
 go_import_path: github.com/twitchtv/retool
 script:
 - go install ./...
-- go test $(go list ./... | grep -v /vendor/)
+- go test -v -race $(go list ./... | grep -v /vendor/)
