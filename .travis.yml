@@ -1,0 +1,8 @@
+sudo: false
+language: go
+go:
+- 1.8
+go_import_path: github.com/twitchtv/retool
+script:
+- go install ./...
+- go test -v -race $(go list ./... | grep -v /vendor/)
