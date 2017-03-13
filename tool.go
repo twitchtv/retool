@@ -107,6 +107,16 @@ func setVersion(t *tool) error {
 	if err != nil {
 		return errors.Wrap(err, "failed to 'git checkout' tool")
 	}
+
+	// Re-run 'go get' in case the new version has a different set of dependencies.
+	cmd = exec.Command("go", "get", "-d", t.Repository)
+	setEnvVar(cmd, "GOPATH", cacheDir)
+	out, err := cmd.Output()
+	if err != nil {
+		return errors.Wrap(err, "failed to 'go get' tool")
+	}
+	log(fmt.Sprintf("out: %s", out))
+
 	return err
 }
 
