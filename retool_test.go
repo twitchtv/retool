@@ -121,4 +121,23 @@ func TestRetool(t *testing.T) {
 		}
 	})
 
+	t.Run("dep_added", func(t *testing.T) {
+		dir, err := ioutil.TempDir("", "")
+		if err != nil {
+			t.Fatalf("unable to make temp dir: %s", err)
+		}
+		defer os.RemoveAll(dir)
+
+		// Use a package which used to have a dependency (in this case, one on
+		// github.com/spenczar/retool_test_lib), but doesn't have that dependency for HEAD of
+		// origin/master today.
+		cmd := exec.Command(retool, "-base-dir", dir, "add",
+			"github.com/spenczar/retool_test_app", "origin/has_dep",
+		)
+		cmd.Dir = dir
+		_, err = cmd.Output()
+		if err != nil {
+			t.Fatalf("expected no errors when using retool add, have this:\n%s", string(err.(*exec.ExitError).Stderr))
+		}
+	})
 }
