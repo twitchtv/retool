@@ -1,6 +1,6 @@
 # Retool: Vendor thy tools! #
 
-[![Build Status](https://travis-ci.org/TwitchScience/kinsumer.svg?branch=master)](https://travis-ci.org/twitchtv/retool)
+[![Build Status](https://travis-ci.org/twitchtv/retool.svg?branch=master)](https://travis-ci.org/twitchtv/retool)
 
 ## what is this ##
 
