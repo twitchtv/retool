@@ -53,7 +53,8 @@ func ensureTooldir() error {
 
 	baseDirPath = *baseDir
 	if baseDirPath == "" {
-		repoRootPath, err := getRepoRoot()
+		var repoRootPath string
+		repoRootPath, err = getRepoRoot()
 		if err != nil {
 			return errors.Wrap(err, "failed to check for enclosing git repository")
 		}
@@ -90,7 +91,7 @@ func ensureTooldir() error {
 
 	err = ioutil.WriteFile(path.Join(toolDirPath, ".gitignore"), gitignore, 0664)
 	if err != nil {
-		errors.Wrap(err, "unable to update .gitignore")
+		return errors.Wrap(err, "unable to update .gitignore")
 	}
 
 	return nil

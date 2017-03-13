@@ -10,9 +10,9 @@ import (
 func setPath() (unset func()) {
 	prevpath := os.Getenv("PATH")
 	newPath := path.Join(toolDirPath, "bin") + ":" + prevpath
-	os.Setenv("PATH", newPath)
+	_ = os.Setenv("PATH", newPath)
 	return func() {
-		os.Setenv("PATH", prevpath)
+		_ = os.Setenv("PATH", prevpath)
 	}
 }
 

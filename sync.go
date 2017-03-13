@@ -18,11 +18,14 @@ func (s spec) sync() {
 		}
 
 		// Recreate the tools directory
-		ensureTooldir()
+		err = ensureTooldir()
+		if err != nil {
+			fatal("failed to ensure tool dir", err)
+		}
 
 		// Download everything to cache
 		for _, t := range s.Tools {
-			err := download(t)
+			err = download(t)
 			if err != nil {
 				fatalExec("failed to sync "+t.Repository, err)
 			}

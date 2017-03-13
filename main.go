@@ -40,33 +40,39 @@ func main() {
 
 	if !specExists() {
 		if cmd == "add" {
-			writeBlankSpec()
+			err := writeBlankSpec()
+			if err != nil {
+				fatal("failed to write blank spec", err)
+			}
 		} else {
 			fatal("tools.json does not yet exist. You need to add a tool first with 'retool add'", nil)
 		}
 	}
 
-	spec, err := read()
+	s, err := read()
 	if err != nil {
 		fatal("failed to load tools.json", err)
 	}
 
 	switch cmd {
 	case "add":
-		spec.add(tool)
+		s.add(tool)
 	case "upgrade":
-		spec.upgrade(tool)
+		s.upgrade(tool)
 	case "remove":
-		spec.remove(tool)
+		s.remove(tool)
 	case "build":
-		spec.build()
+		s.build()
 	case "sync":
-		spec.sync()
+		s.sync()
 	case "do":
-		spec.sync()
+		s.sync()
 		do()
 	case "clean":
-		os.RemoveAll(cacheDir)
+		err = os.RemoveAll(cacheDir)
+		if err != nil {
+			fatal("Failure during clean", err)
+		}
 	default:
 		fatal(fmt.Sprintf("unknown cmd %q", cmd), nil)
 	}

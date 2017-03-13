@@ -70,11 +70,14 @@ func setVersion(t *tool) error {
 	if t.Fork != "" {
 		cmd := exec.Command("git", "remote", "rm", "fork")
 		cmd.Dir = t.path()
-		cmd.Output()
+		_, err := cmd.Output()
+		if err != nil {
+			return err
+		}
 
 		cmd = exec.Command("git", "remote", "add", "-f", "fork", t.Fork)
 		cmd.Dir = t.path()
-		_, err := cmd.Output()
+		_, err = cmd.Output()
 		if err != nil {
 			return err
 		}
@@ -93,7 +96,9 @@ func setVersion(t *tool) error {
 		log(fmt.Sprintf("parsing revision %q", t.ref))
 		cmd = exec.Command("git", "rev-parse", t.ref)
 		cmd.Dir = t.path()
-		out, err := cmd.Output()
+
+		var out []byte
+		out, err = cmd.Output()
 		if err != nil {
 			return err
 		}
