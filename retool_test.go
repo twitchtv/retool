@@ -134,7 +134,9 @@ func TestRetool(t *testing.T) {
 		if err != nil {
 			t.Fatalf("unable to make temp dir: %s", err)
 		}
-		defer os.RemoveAll(dir)
+		defer func() {
+			_ = os.RemoveAll(dir)
+		}()
 
 		// Use a package which used to have a dependency (in this case, one on
 		// github.com/spenczar/retool_test_lib), but doesn't have that dependency for HEAD of
