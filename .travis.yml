@@ -9,6 +9,15 @@ go:
 script:
 - go install ./...
 - go test -v -race $(go list ./... | grep -v /vendor/)
+- go vet $(go list ./... | grep -v /vendor/)
+- go vet -shadow *.go
+
 - retool sync
-- retool do gometalinter --install
-- retool do gometalinter ./... --vendor --disable gocyclo --disable gas --disable goconst
+- retool do errcheck *.go
+- retool do deadcode .
+- retool do varcheck ./...
+- retool do aligncheck ./...
+- retool do varcheck ./...
+- retool do ineffassign .
+
+
