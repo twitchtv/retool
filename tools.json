@@ -1,0 +1,8 @@
+{
+  "Tools": [
+    {
+      "Repository": "github.com/alecthomas/gometalinter",
+      "Commit": "e8ad4316afe4ae968b63fffc9d9dbd423d28f49f"
+    }
+  ]
+}

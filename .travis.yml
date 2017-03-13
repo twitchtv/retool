@@ -6,11 +6,9 @@ go:
 - 1.8
 - tip
 
-before_script:
-- go get github.com/alecthomas/gometalinter
-- gometalinter --install
-
 script:
 - go install ./...
 - go test -v -race $(go list ./... | grep -v /vendor/)
-- gometalinter ./... --vendor --disable gocyclo --disable gas --disable goconst
+- retool sync
+- retool do gometalinter --install
+- retool do gometalinter ./... --vendor --disable gocyclo --disable gas --disable goconst
