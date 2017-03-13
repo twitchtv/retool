@@ -30,7 +30,9 @@ retool pins on a per-project basis. It works by making a complete GOPATH
 within your project. You can choose to commit the source files for those
 tools, if you like.
 
-## wat do ##
+## usage ##
+
+The expected workflow is something like this:
 
 Install retool:
 ```sh
@@ -39,18 +41,23 @@ go get github.com/retool/retool
 
 Add a tool dependency:
 ```sh
-retool add github.com/golang/protobuf/protoc-gen-go origin/master
+retool add github.com/jteeuwen/go-bindata/go-bindata origin/master
 ```
 
 Use it to generate code:
 ```sh
-# calls go generate ./... using only tools installed with retool
-retool do go generate ./...
+retool do go-bindata -pkg testdata -o ./testdata/testdata.go ./testdata/data.json
 ```
 
-Upgrade your tools to their latest version:
+---
+
+There are a few other commands that you'll use much less often:
+
+Upgrade a tool to its latest version:
 ```sh
-retool upgrade github.com/golang/protobuf/protoc-gen-go origin/master
+retool upgrade github.com/spf13/hugo origin/master
+# or to a particular tag
+retool upgrade github.com/spf13/hugo v0.17
 ```
 
 Stop using that tool you dont like anymore:
@@ -60,13 +67,13 @@ retool remove github.com/tools/godep
 
 Compile all the tools that other people have vendored in a project:
 ```sh
-# compiles everything without using the network
+# compiles everything without using the network - useful for isolated build environments
 retool build
 ```
 
-Stay in sync:
+Double-check that you're in sync by comparing everything with upstream versions:
 ```sh
-# makes sure your tools match tools.json
+# makes sure your tools match tools.json by comparing against their remotes
 retool sync
 ```
 
@@ -100,8 +107,8 @@ a better way!
 
 ## the retool way ##
 
-retool records the versions of tools you want in a file,
-`tools.json`. The file looks like this:
+retool records the versions of tools you want in a file, `tools.json`.
+The file looks like this:
 
 ```json
 {
@@ -114,19 +121,18 @@ retool records the versions of tools you want in a file,
 }
 ```
 
-Tools are identified by repo and commit. Each tool in `tools.json`
-will be installed to `_tools`, which is a private GOPATH just
-dedicated to keeping track of these tools.
+Tools are identified by repo and commit. Each tool in `tools.json` will
+be installed to `_tools`, which is a private GOPATH just dedicated to
+keeping track of these tools.
 
 In practice, you don't need to know much about `tools.json`. You check
 it in to git so that everybody stays in sync, but you manage it with
 `retool add|upgrade|remove`.
 
-When it's time to generate code, **instead of `go generate ./...`**,
-you use `retool do go generate ./...` to use your sweet, vendored
-tools. This really just calls `PATH=$PWD/_tools/bin:PATH go generate
-./...`; if you want to do anything fancy, you can feel free to use
-that path too.
+When it's time to generate code, **instead of `go generate ./...`**, you
+use `retool do go generate ./...` to use your sweet, vendored tools.
+This really just calls `PATH=$PWD/_tools/bin:PATH go generate ./...`; if
+you want to do anything fancy, you can feel free to use that path too.
 
 ## contributing to retool ##
 
