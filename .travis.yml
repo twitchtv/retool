@@ -10,7 +10,7 @@ script:
 - go install ./...
 - go test -v -race $(go list ./... | grep -v /vendor/)
 - go vet $(go list ./... | grep -v /vendor/)
-- go vet -shadow *.go
+- go tool vet -shadow *.go
 
 - retool sync
 - retool do errcheck *.go
