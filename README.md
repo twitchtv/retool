@@ -1,4 +1,34 @@
-# Retool: Make Code Generation Great Again #
+# Retool: Vendor thy tools! #
+
+## what is this ##
+
+retool helps manage the versions of _tools_ that you use with your
+repository. These are executables that are a crucial part of your
+development environment, but aren't imported by any of your code, so
+they don't get scooped up by glide or godep (or any other vendoring
+tool).
+
+Some examples of tools:
+
+ - [github.com/tools/godep](github.com/tools/godep) is a tool to
+   vendor Go packages.
+ - [github.com/golang/protobuf/protoc-gen-go](https://github.com/golang/protobuf/protoc-gen-go)
+   is a tool to compile Go code from protobuf definitions.
+ - [github.com/maxbrunsfeld/counterfeiter](https://github.com/maxbrunsfeld/counterfeiter)
+   is a tool to generate mocks of interfaces.
+
+You want this if you use code generation: if everybody has a different
+version of the code generator, then you'll get meaningless churn across
+runs of the generator unless everyone is pinned to the right version.
+
+You might also want this if you use linters or tools like
+[github.com/kisielk/errcheck](https://github.com/kisielk/errcheck) in an
+automated fashion and you want to make sure that everyone has the same
+version so you can pass flags to the linter with confidence.
+
+retool pins on a per-project basis. It works by making a complete GOPATH
+within your project. You can choose to commit the source files for those
+tools, if you like.
 
 ## wat do ##
 
@@ -23,7 +53,7 @@ Upgrade your tools to their latest version:
 retool upgrade github.com/golang/protobuf/protoc-gen-go origin/master
 ```
 
-Stop using that stupid tool you dont like anymore:
+Stop using that tool you dont like anymore:
 ```sh
 retool remove github.com/tools/godep
 ```
@@ -39,22 +69,6 @@ Stay in sync:
 # makes sure your tools match tools.json
 retool sync
 ```
-
-## what is this ##
-
-retool helps manage the versions of _tools_ that you use with your
-repository. These are executables that are a crucial part of your
-development environment, but aren't imported by any of your code, so
-they don't get scooped up by godeps (or any other vendoring tool).
-
-Some examples of tools:
-
- - [github.com/tools/godep](github.com/tools/godep) is a tool to
-   vendor Go packages.
- - [github.com/golang/protobuf/protoc-gen-go](https://github.com/golang/protobuf/protoc-gen-go)
-   is a tool to compile Go code from protobuf definitions.
- - [github.com/maxbrunsfeld/counterfeiter](https://github.com/maxbrunsfeld/counterfeiter)
-   is a tool to generate mocks of interfaces.
 
 ## why would i need to manage these things  ##
 
@@ -116,8 +130,8 @@ that path too.
 
 ## contributing to retool ##
 
-Any pull requests are extremely welcome! If you run into problems or have questions, please raise a
-github issue!
+Any pull requests are extremely welcome! If you run into problems or
+have questions, please raise a github issue!
 
-Retool's tests are mostly integration tests. They require a working Go compiler, a working version
-of git, and network access.
+Retool's tests are mostly integration tests. They require a working Go
+compiler, a working version of git, and network access.
