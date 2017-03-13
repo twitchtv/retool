@@ -80,7 +80,7 @@ func parseArgs() (command string, t *tool) {
 
 	case "help":
 		assertArgLength(args, command, 1)
-		printUsageAndExit(args[1], 0)
+		printUsageAndExit(args[0], 0)
 
 	default:
 		printUsageAndExit("", 1)
