@@ -1,0 +1,32 @@
+{
+  "Tools": [
+    {
+      "Repository": "github.com/golang/lint/golint",
+      "Commit": "cb00e5669539f047b2f4c53a421a01b0c8e172c6"
+    },
+    {
+      "Repository": "github.com/tsenart/deadcode",
+      "Commit": "210d2dc333e90c7e3eedf4f2242507a8e83ed4ab"
+    },
+    {
+      "Repository": "github.com/opennota/check/cmd/varcheck",
+      "Commit": "5b00aacd5639507d2b039245a278ec9f5505509f"
+    },
+    {
+      "Repository": "github.com/opennota/check/cmd/aligncheck",
+      "Commit": "5b00aacd5639507d2b039245a278ec9f5505509f"
+    },
+    {
+      "Repository": "github.com/opennota/check/cmd/structcheck",
+      "Commit": "5b00aacd5639507d2b039245a278ec9f5505509f"
+    },
+    {
+      "Repository": "github.com/kisielk/errcheck",
+      "Commit": "db0ca22445717d1b2c51ac1034440e0a2a2de645"
+    },
+    {
+      "Repository": "github.com/gordonklaus/ineffassign",
+      "Commit": "99762ed65232b1477364c8c53778f8b6503e868c"
+    }
+  ]
+}

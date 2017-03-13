@@ -14,12 +14,10 @@ var (
 	positionalArgs []string
 )
 
-// TODO: Will this bother errcheck?
-func verbosef(format string, a ...interface{}) (n int, err error) {
+func verbosef(format string, a ...interface{}) {
 	if *verboseFlag {
-		return fmt.Fprintf(os.Stderr, format, a...)
+		_, _ = fmt.Fprintf(os.Stderr, format, a...)
 	}
-	return 0, nil
 }
 
 func parseArgs() (command string, t *tool) {

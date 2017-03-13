@@ -34,14 +34,18 @@ func TestRetool(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.Remove(retool)
+	defer func() {
+		_ = os.Remove(retool)
+	}()
 
 	t.Run("cache pollution", func(t *testing.T) {
 		dir, err := ioutil.TempDir("", "")
 		if err != nil {
 			t.Fatalf("unable to make temp dir: %s", err)
 		}
-		defer os.RemoveAll(dir)
+		defer func() {
+			_ = os.RemoveAll(dir)
+		}()
 
 		// This should fail because this version of mockery has an import line that points to uber's
 		// internal repo, which can't be reached:
@@ -72,7 +76,9 @@ func TestRetool(t *testing.T) {
 		if err != nil {
 			t.Fatalf("unable to make temp dir: %s", err)
 		}
-		defer os.RemoveAll(dir)
+		defer func() {
+			_ = os.RemoveAll(dir)
+		}()
 
 		// Should work even in a directory without tools.json
 		cmd := exec.Command(retool, "version")
@@ -91,7 +97,9 @@ func TestRetool(t *testing.T) {
 		if err != nil {
 			t.Fatalf("unable to make temp dir: %s", err)
 		}
-		defer os.RemoveAll(dir)
+		defer func() {
+			_ = os.RemoveAll(dir)
+		}()
 
 		cmd := exec.Command(retool, "-base-dir", dir, "add",
 			"github.com/twitchtv/retool", "origin/master",
@@ -103,9 +111,9 @@ func TestRetool(t *testing.T) {
 		}
 
 		// Suppose we only have _tools/src available. Does `retool build` work?
-		os.RemoveAll(filepath.Join(dir, "_tools", "bin"))
-		os.RemoveAll(filepath.Join(dir, "_tools", "pkg"))
-		os.RemoveAll(filepath.Join(dir, "_tools", "manifest.json"))
+		_ = os.RemoveAll(filepath.Join(dir, "_tools", "bin"))
+		_ = os.RemoveAll(filepath.Join(dir, "_tools", "pkg"))
+		_ = os.RemoveAll(filepath.Join(dir, "_tools", "manifest.json"))
 
 		cmd = exec.Command(retool, "-base-dir", dir, "build")
 		cmd.Dir = dir

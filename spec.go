@@ -21,7 +21,9 @@ func (s spec) write() error {
 	if err != nil {
 		return fmt.Errorf("unable to open %s: %s", specfile, err)
 	}
-	defer f.Close()
+	defer func() {
+		_ = f.Close()
+	}()
 
 	bytes, err := json.MarshalIndent(s, "", "  ")
 	if err != nil {
@@ -60,7 +62,9 @@ func read() (spec, error) {
 	if err != nil {
 		return spec{}, fmt.Errorf("unable to open spec file at %s: %s", specfile, err)
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	s := new(spec)
 	err = json.NewDecoder(file).Decode(s)

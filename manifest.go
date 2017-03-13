@@ -17,9 +17,14 @@ func getManifest() manifest {
 	if err != nil {
 		return m
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
-	json.NewDecoder(file).Decode(&m)
+	err = json.NewDecoder(file).Decode(&m)
+	if err != nil {
+		fatal("Failed to decode manifest", err)
+	}
 	return m
 }
 
@@ -28,14 +33,16 @@ func (m manifest) write() {
 	if err != nil {
 		return
 	}
-	defer f.Close()
+	defer func() {
+		_ = f.Close()
+	}()
 
 	bytes, err := json.MarshalIndent(m, "", "  ")
 	if err != nil {
 		return
 	}
 
-	f.Write(bytes)
+	_, _ = f.Write(bytes)
 }
 
 func (m manifest) outOfDate(ts []*tool) bool {
@@ -52,11 +59,7 @@ func (m manifest) outOfDate(ts []*tool) bool {
 		delete(m2, t.Repository)
 	}
 
-	if len(m2) != 0 {
-		return true
-	}
-
-	return false
+	return len(m2) != 0
 }
 
 func (m manifest) replace(ts []*tool) {

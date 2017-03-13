@@ -1,8 +1,23 @@
-sudo: false
 language: go
-go:
-- 1.8
 go_import_path: github.com/twitchtv/retool
+
+go:
+- 1.7.5
+- 1.8
+- tip
+
 script:
 - go install ./...
 - go test -v -race $(go list ./... | grep -v /vendor/)
+- go vet $(go list ./... | grep -v /vendor/)
+- go tool vet -shadow *.go
+
+- retool sync
+- retool do errcheck *.go
+- retool do deadcode .
+- retool do varcheck ./...
+- retool do aligncheck ./...
+- retool do varcheck ./...
+- retool do ineffassign .
+
+
