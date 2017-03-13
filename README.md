@@ -1,5 +1,7 @@
 # Retool: Vendor thy tools! #
 
+[![Build Status](https://travis-ci.org/TwitchScience/kinsumer.svg?branch=master)](https://travis-ci.org/twitchtv/retool)
+
 ## what is this ##
 
 retool helps manage the versions of _tools_ that you use with your
