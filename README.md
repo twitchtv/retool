@@ -96,7 +96,7 @@ your interaction points with
 interfaces. [github.com/maxbrunsfeld/counterfeiter](https://github.com/maxbrunsfeld/counterfeiter)
 does this pretty well!
 
-If you want to use the generate code, you should check in the
+If you want to use the generated code, you should check in the
 generated `.go` code to git, not just the sources, so that build boxes
 and the like don't need all these code generation tools, and so that
 `go get` just works cleanly.
