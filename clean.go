@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"go/build"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 )
@@ -41,7 +40,7 @@ func clean(pkgs []string) {
 
 	resolve("", pkgs)
 
-	base := path.Join(toolDirPath, "src")
+	base := filepath.Join(toolDirPath, "src")
 
 	// Resolve any symlinks in the packages to keep, because we're going
 	// to walk through the file system, so we need to trim stuff by

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -19,11 +18,11 @@ type tool struct {
 }
 
 func (t *tool) path() string {
-	return path.Join(cacheDir, "src", t.Repository)
+	return filepath.Join(cacheDir, "src", t.Repository)
 }
 
 func (t *tool) executable() string {
-	return path.Base(t.Repository)
+	return filepath.Base(t.Repository)
 }
 
 func setEnvVar(cmd *exec.Cmd, key, val string) {

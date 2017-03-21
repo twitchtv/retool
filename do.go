@@ -3,13 +3,13 @@ package main
 import (
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 	"strings"
 )
 
 func setPath() (unset func()) {
 	prevpath := os.Getenv("PATH")
-	newPath := path.Join(toolDirPath, "bin") + ":" + prevpath
+	newPath := filepath.Join(toolDirPath, "bin") + string(os.PathListSeparator) + prevpath
 	_ = os.Setenv("PATH", newPath)
 	return func() {
 		_ = os.Setenv("PATH", prevpath)
