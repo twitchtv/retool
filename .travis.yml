@@ -12,12 +12,10 @@ script:
 - go vet $(go list ./... | grep -v /vendor/)
 - go tool vet -shadow *.go
 
-- retool sync
+- retool build
 - retool do errcheck *.go
 - retool do deadcode .
 - retool do varcheck ./...
 - retool do aligncheck ./...
 - retool do varcheck ./...
 - retool do ineffassign .
-
-
