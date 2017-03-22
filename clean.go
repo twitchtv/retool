@@ -128,19 +128,35 @@ func keepFile(filename string) bool {
 }
 
 var commonLegalFilePrefixes = []string{
-	"license",
-	"licence",
-	"legal",
+	"licence", // UK spelling
+	"license", // US spelling
 	"copying",
-	"copyright",
 	"unlicense",
+	"copyright",
+	"copyleft",
+	"authors",
+	"contributors",
 	"readme", // often has a license inline
+}
+
+var commonLegalFileSubstrings = []string{
+	"legal",
+	"notice",
+	"disclaimer",
+	"patent",
+	"third-party",
+	"thirdparty",
 }
 
 func isLegalFile(filename string) bool {
 	base := strings.ToLower(filepath.Base(filename))
 	for _, p := range commonLegalFilePrefixes {
 		if strings.HasPrefix(base, p) {
+			return true
+		}
+	}
+	for _, s := range commonLegalFileSubstrings {
+		if strings.Contains(base, s) {
 			return true
 		}
 	}

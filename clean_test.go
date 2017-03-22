@@ -26,7 +26,9 @@ func TestIsLegalFile(t *testing.T) {
 	testcase("COPYING", true)
 	testcase("COPYRIGHT", true)
 	testcase("UNLICENSE", true)
+	testcase("PATENTS", true)
 
+	testcase(filepath.Join("pat", "ents"), false)
 	testcase("picture.jpeg", false)
 }
 
