@@ -161,4 +161,52 @@ func TestRetool(t *testing.T) {
 			}
 		}
 	})
+
+	t.Run("upgrade", func(t *testing.T) {
+		dir, err := ioutil.TempDir("", "")
+		if err != nil {
+			t.Fatalf("unable to make temp dir: %s", err)
+		}
+		defer func() {
+			_ = os.RemoveAll(dir)
+		}()
+
+		cmd := exec.Command(retool, "-base-dir", dir, "add",
+			"github.com/twitchtv/retool", "v1.0.1",
+		)
+		cmd.Dir = dir
+		_, err = cmd.Output()
+		if err != nil {
+			if exitErr, ok := err.(*exec.ExitError); ok {
+				t.Fatalf("expected no errors when using retool add, have this:\n%s", string(exitErr.Stderr))
+			} else {
+				t.Fatalf("unexpected err when running %q: %q", strings.Join(cmd.Args, " "), err)
+			}
+		}
+
+		cmd = exec.Command(retool, "-base-dir", dir, "upgrade",
+			"github.com/twitchtv/retool", "v1.0.3",
+		)
+		cmd.Dir = dir
+		_, err = cmd.Output()
+		if err != nil {
+			if exitErr, ok := err.(*exec.ExitError); ok {
+				t.Fatalf("expected no errors when using retool upgrade, have this:\n%s", string(exitErr.Stderr))
+			} else {
+				t.Fatalf("unexpected err when running %q: %q", strings.Join(cmd.Args, " "), err)
+			}
+		}
+
+		cmd = exec.Command(retool, "do", "retool", "version")
+		cmd.Dir = dir
+		out, err := cmd.Output()
+		if err != nil {
+			t.Fatalf("unexpected err when running %q: %q\nout:%s", strings.Join(cmd.Args, " "), err, out)
+		}
+
+		if want := "retool v1.0.3"; string(out) != want {
+			t.Errorf("have=%q, want=%q", string(out), want)
+		}
+
+	})
 }
