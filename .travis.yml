@@ -21,4 +21,5 @@ script:
 - retool do deadcode .
 - retool do varcheck .
 - retool do aligncheck .
+- retool do structcheck .
 - retool do ineffassign .
