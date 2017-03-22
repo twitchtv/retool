@@ -6,25 +6,9 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
-
-	"github.com/pkg/errors"
 )
-
-// buildRetool builds retool in a temporary directory and returns the path to the built binary
-func buildRetool() (string, error) {
-	dir, err := ioutil.TempDir("", "")
-	if err != nil {
-		return "", errors.Wrap(err, "unable to create temporary build directory")
-	}
-	output := filepath.Join(dir, "retool")
-	cmd := exec.Command("go", "build", "-o", output, ".")
-	_, err = cmd.Output()
-	if err != nil {
-		return "", errors.Wrap(err, "unable to build retool binary")
-	}
-	return output, nil
-}
 
 func TestRetool(t *testing.T) {
 	// These integration tests require more than most go tests: they require a go compiler to build
@@ -35,7 +19,7 @@ func TestRetool(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer func() {
-		_ = os.Remove(retool)
+		_ = os.RemoveAll(filepath.Dir(retool))
 	}()
 
 	t.Run("cache pollution", func(t *testing.T) {
@@ -67,7 +51,11 @@ func TestRetool(t *testing.T) {
 		cmd.Dir = dir
 		_, err = cmd.Output()
 		if err != nil {
-			t.Fatalf("expected no error when adding mockery at broken commit d895b9, but got this:\n%s", string(err.(*exec.ExitError).Stderr))
+			if exitErr, ok := err.(*exec.ExitError); ok {
+				t.Fatalf("expected no error when adding mockery at broken commit d895b9, but got this:\n%s", string(exitErr.Stderr))
+			} else {
+				t.Fatalf("unexpected err when running %q: %q", strings.Join(cmd.Args, " "), err)
+			}
 		}
 	})
 
@@ -107,7 +95,11 @@ func TestRetool(t *testing.T) {
 		cmd.Dir = dir
 		_, err = cmd.Output()
 		if err != nil {
-			t.Fatalf("expected no errors when using retool add, have this:\n%s", string(err.(*exec.ExitError).Stderr))
+			if exitErr, ok := err.(*exec.ExitError); ok {
+				t.Fatalf("expected no errors when using retool add, have this:\n%s", string(exitErr.Stderr))
+			} else {
+				t.Fatalf("unexpected err when running %q: %q", strings.Join(cmd.Args, " "), err)
+			}
 		}
 
 		// Suppose we only have _tools/src available. Does `retool build` work?
@@ -118,15 +110,17 @@ func TestRetool(t *testing.T) {
 		cmd = exec.Command(retool, "-base-dir", dir, "build")
 		cmd.Dir = dir
 		_, err = cmd.Output()
+
 		if err != nil {
-			t.Fatalf("expected no errors when using retool build, have this:\n%s", string(err.(*exec.ExitError).Stderr))
+			if exitErr, ok := err.(*exec.ExitError); ok {
+				t.Fatalf("expected no errors when using retool build, have this:\n%s", string(exitErr.Stderr))
+			} else {
+				t.Fatalf("unexpected err when running %q: %q", strings.Join(cmd.Args, " "), err)
+			}
 		}
 
 		// Now the binary should be installed
-		_, err = os.Stat(filepath.Join(dir, "_tools", "bin", "retool"))
-		if err != nil {
-			t.Fatalf("unable to stat _tools/bin/retool after calling retool build: %s", err)
-		}
+		assertBinInstalled(t, dir, "retool")
 	})
 
 	t.Run("dep_added", func(t *testing.T) {
@@ -147,7 +141,11 @@ func TestRetool(t *testing.T) {
 		cmd.Dir = dir
 		_, err = cmd.Output()
 		if err != nil {
-			t.Fatalf("expected no errors when using retool add, have this:\n%s", string(err.(*exec.ExitError).Stderr))
+			if exitErr, ok := err.(*exec.ExitError); ok {
+				t.Fatalf("expected no errors when using retool add, have this:\n%s", string(exitErr.Stderr))
+			} else {
+				t.Fatalf("unexpected err when running %q: %q", strings.Join(cmd.Args, " "), err)
+			}
 		}
 	})
 }
