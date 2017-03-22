@@ -148,4 +148,17 @@ func TestRetool(t *testing.T) {
 			}
 		}
 	})
+
+	t.Run("clean", func(t *testing.T) {
+		// Clean should be a noop, but kept around for compatibility
+		cmd := exec.Command(retool, "clean")
+		_, err := cmd.Output()
+		if err != nil {
+			if exitErr, ok := err.(*exec.ExitError); ok {
+				t.Fatalf("expected no errors when using retool clean, have this:\n%s", string(exitErr.Stderr))
+			} else {
+				t.Fatalf("unexpected err when running %q: %q", strings.Join(cmd.Args, " "), err)
+			}
+		}
+	})
 }

@@ -18,7 +18,7 @@ type tool struct {
 }
 
 func (t *tool) path() string {
-	return filepath.Join(cacheDir, "src", t.Repository)
+	return filepath.Join(toolDirPath, "src", t.Repository)
 }
 
 func (t *tool) executable() string {
@@ -48,15 +48,15 @@ func setEnvVar(cmd *exec.Cmd, key, val string) {
 }
 
 func get(t *tool) error {
-	// If the repo is already downloaded to the cache, then we can exit early
-	if _, err := os.Stat(filepath.Join(cacheDir, "src", t.Repository)); err == nil {
+	// If the repo is already downloaded, then we can exit early
+	if _, err := os.Stat(filepath.Join(toolDirPath, "src", t.Repository)); err == nil {
 		log(t.Repository + " already exists, skipping 'get' step")
 		return nil
 	}
 
 	log("downloading " + t.Repository)
 	cmd := exec.Command("go", "get", "-d", t.Repository)
-	setEnvVar(cmd, "GOPATH", cacheDir)
+	setEnvVar(cmd, "GOPATH", toolDirPath)
 	_, err := cmd.Output()
 	if err != nil {
 		return errors.Wrap(err, "failed to 'go get' tool")
@@ -114,7 +114,7 @@ func setVersion(t *tool) error {
 
 	// Re-run 'go get' in case the new version has a different set of dependencies.
 	cmd = exec.Command("go", "get", "-d", t.Repository)
-	setEnvVar(cmd, "GOPATH", cacheDir)
+	setEnvVar(cmd, "GOPATH", toolDirPath)
 	_, err = cmd.Output()
 	if err != nil {
 		return errors.Wrap(err, "failed to 'go get' tool")
