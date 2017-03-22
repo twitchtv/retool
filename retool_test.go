@@ -68,8 +68,8 @@ func TestRetool(t *testing.T) {
 		cmd.Dir = dir
 		_, err = cmd.Output()
 		if err != nil {
-			if err, ok := err.(*exec.ExitError); ok {
-				t.Fatalf("expected no error when adding mockery at broken commit d895b9, but got this:\n%s", string(err.Stderr))
+			if exitErr, ok := err.(*exec.ExitError); ok {
+				t.Fatalf("expected no error when adding mockery at broken commit d895b9, but got this:\n%s", string(exitErr.Stderr))
 			} else {
 				t.Fatalf("unexpected err when running %q: %q", strings.Join(cmd.Args, " "), err)
 			}
@@ -112,8 +112,8 @@ func TestRetool(t *testing.T) {
 		cmd.Dir = dir
 		_, err = cmd.Output()
 		if err != nil {
-			if err, ok := err.(*exec.ExitError); ok {
-				t.Fatalf("expected no errors when using retool add, have this:\n%s", string(err.Stderr))
+			if exitErr, ok := err.(*exec.ExitError); ok {
+				t.Fatalf("expected no errors when using retool add, have this:\n%s", string(exitErr.Stderr))
 			} else {
 				t.Fatalf("unexpected err when running %q: %q", strings.Join(cmd.Args, " "), err)
 			}
@@ -129,8 +129,8 @@ func TestRetool(t *testing.T) {
 		_, err = cmd.Output()
 
 		if err != nil {
-			if err, ok := err.(*exec.ExitError); ok {
-				t.Fatalf("expected no errors when using retool build, have this:\n%s", string(err.Stderr))
+			if exitErr, ok := err.(*exec.ExitError); ok {
+				t.Fatalf("expected no errors when using retool build, have this:\n%s", string(exitErr.Stderr))
 			} else {
 				t.Fatalf("unexpected err when running %q: %q", strings.Join(cmd.Args, " "), err)
 			}
@@ -161,8 +161,8 @@ func TestRetool(t *testing.T) {
 		cmd.Dir = dir
 		_, err = cmd.Output()
 		if err != nil {
-			if err, ok := err.(*exec.ExitError); ok {
-				t.Fatalf("expected no errors when using retool add, have this:\n%s", string(err.Stderr))
+			if exitErr, ok := err.(*exec.ExitError); ok {
+				t.Fatalf("expected no errors when using retool add, have this:\n%s", string(exitErr.Stderr))
 			} else {
 				t.Fatalf("unexpected err when running %q: %q", strings.Join(cmd.Args, " "), err)
 			}
