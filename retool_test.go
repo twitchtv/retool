@@ -121,6 +121,12 @@ func TestRetool(t *testing.T) {
 
 		// Now the binary should be installed
 		assertBinInstalled(t, dir, "retool")
+
+		// Legal files should be kept around
+		_, err = os.Stat(filepath.Join(dir, "_tools", "src", "github.com", "twitchtv", "retool", "LICENSE"))
+		if err != nil {
+			t.Error("missing license file")
+		}
 	})
 
 	t.Run("dep_added", func(t *testing.T) {

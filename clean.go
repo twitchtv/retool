@@ -77,15 +77,12 @@ func clean(pkgs []string) {
 			return err
 		}
 
-		// Delete files in packages that aren't marked as "keep",
-		// and any non-go or test files.
+		// Delete files in packages that aren't in packages we need to build the
+		// tools, and any non-go, non-legal files in packages we *do* need.
 		if info.Mode().IsRegular() {
 			pkg = filepath.Dir(pkg)
 			_, keptPkg := keep[pkg]
-			isGo := strings.HasSuffix(path, ".go")
-			isAssembly := strings.HasSuffix(path, ".s")
-			isTest := strings.HasSuffix(path, "_test.go")
-			if !keptPkg || !(isGo || isAssembly) || isTest {
+			if !(keptPkg && keepFile(path)) {
 				toDelete = append(toDelete, path)
 			}
 			return nil
@@ -112,4 +109,56 @@ func clean(pkgs []string) {
 			fatal("unable to remove file or directory", err)
 		}
 	}
+}
+
+func keepFile(filename string) bool {
+	if strings.HasSuffix(filename, "_test.go") {
+		return false
+	}
+	if strings.HasSuffix(filename, ".go") {
+		return true
+	}
+	if strings.HasSuffix(filename, ".s") {
+		return true
+	}
+	if isLegalFile(filename) {
+		return true
+	}
+	return false
+}
+
+var commonLegalFilePrefixes = []string{
+	"licence", // UK spelling
+	"license", // US spelling
+	"copying",
+	"unlicense",
+	"copyright",
+	"copyleft",
+	"authors",
+	"contributors",
+	"readme", // often has a license inline
+}
+
+var commonLegalFileSubstrings = []string{
+	"legal",
+	"notice",
+	"disclaimer",
+	"patent",
+	"third-party",
+	"thirdparty",
+}
+
+func isLegalFile(filename string) bool {
+	base := strings.ToLower(filepath.Base(filename))
+	for _, p := range commonLegalFilePrefixes {
+		if strings.HasPrefix(base, p) {
+			return true
+		}
+	}
+	for _, s := range commonLegalFileSubstrings {
+		if strings.Contains(base, s) {
+			return true
+		}
+	}
+	return false
 }
