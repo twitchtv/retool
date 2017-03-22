@@ -1,6 +1,10 @@
 language: go
 go_import_path: github.com/twitchtv/retool
 
+os:
+  - linux
+  - osx
+
 go:
 - 1.7.5
 - 1.8
@@ -19,5 +23,3 @@ script:
 - retool do aligncheck ./...
 - retool do varcheck ./...
 - retool do ineffassign .
-
-
