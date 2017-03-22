@@ -25,4 +25,4 @@ build: false
 deploy: false
 
 test_script:
-  - go test -v -race $(go list ./... | grep -v /vendor/)
+  - go test -v -race .
