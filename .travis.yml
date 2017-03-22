@@ -17,9 +17,8 @@ script:
 - go tool vet -shadow *.go
 
 - retool build
-- retool do errcheck *.go
+- retool do errcheck .
 - retool do deadcode .
-- retool do varcheck ./...
-- retool do aligncheck ./...
-- retool do varcheck ./...
+- retool do varcheck .
+- retool do aligncheck .
 - retool do ineffassign .
