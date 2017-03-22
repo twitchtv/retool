@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/pkg/errors"
@@ -67,7 +68,11 @@ func TestRetool(t *testing.T) {
 		cmd.Dir = dir
 		_, err = cmd.Output()
 		if err != nil {
-			t.Fatalf("expected no error when adding mockery at broken commit d895b9, but got this:\n%s", string(err.(*exec.ExitError).Stderr))
+			if err, ok := err.(*exec.ExitError); ok {
+				t.Fatalf("expected no error when adding mockery at broken commit d895b9, but got this:\n%s", string(err.Stderr))
+			} else {
+				t.Fatalf("unexpected err when running %q: %q", strings.Join(cmd.Args, " "), err)
+			}
 		}
 	})
 
@@ -107,7 +112,11 @@ func TestRetool(t *testing.T) {
 		cmd.Dir = dir
 		_, err = cmd.Output()
 		if err != nil {
-			t.Fatalf("expected no errors when using retool add, have this:\n%s", string(err.(*exec.ExitError).Stderr))
+			if err, ok := err.(*exec.ExitError); ok {
+				t.Fatalf("expected no errors when using retool add, have this:\n%s", string(err.Stderr))
+			} else {
+				t.Fatalf("unexpected err when running %q: %q", strings.Join(cmd.Args, " "), err)
+			}
 		}
 
 		// Suppose we only have _tools/src available. Does `retool build` work?
@@ -118,8 +127,13 @@ func TestRetool(t *testing.T) {
 		cmd = exec.Command(retool, "-base-dir", dir, "build")
 		cmd.Dir = dir
 		_, err = cmd.Output()
+
 		if err != nil {
-			t.Fatalf("expected no errors when using retool build, have this:\n%s", string(err.(*exec.ExitError).Stderr))
+			if err, ok := err.(*exec.ExitError); ok {
+				t.Fatalf("expected no errors when using retool build, have this:\n%s", string(err.Stderr))
+			} else {
+				t.Fatalf("unexpected err when running %q: %q", strings.Join(cmd.Args, " "), err)
+			}
 		}
 
 		// Now the binary should be installed
@@ -147,7 +161,11 @@ func TestRetool(t *testing.T) {
 		cmd.Dir = dir
 		_, err = cmd.Output()
 		if err != nil {
-			t.Fatalf("expected no errors when using retool add, have this:\n%s", string(err.(*exec.ExitError).Stderr))
+			if err, ok := err.(*exec.ExitError); ok {
+				t.Fatalf("expected no errors when using retool add, have this:\n%s", string(err.Stderr))
+			} else {
+				t.Fatalf("unexpected err when running %q: %q", strings.Join(cmd.Args, " "), err)
+			}
 		}
 	})
 }
