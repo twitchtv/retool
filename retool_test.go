@@ -119,13 +119,19 @@ func TestRetool(t *testing.T) {
 		cmd.Dir = dir
 		_, err = cmd.Output()
 		if err != nil {
-			t.Fatalf("expected no errors when using retool build, have this:\n%s", string(err.(*exec.ExitError).Stderr))
+			t.Errorf("expected no errors when using retool build, have this:\n%s", string(err.(*exec.ExitError).Stderr))
 		}
 
 		// Now the binary should be installed
 		_, err = os.Stat(filepath.Join(dir, "_tools", "bin", "retool"))
 		if err != nil {
-			t.Fatalf("unable to stat _tools/bin/retool after calling retool build: %s", err)
+			t.Errorf("unable to stat _tools/bin/retool after calling retool build: %s", err)
+		}
+
+		// Legal files should be kept around
+		_, err = os.Stat(filepath.Join(dir, "_tools", "src", "github.com", "twitchtv", "retool", "LICENSE"))
+		if err != nil {
+			t.Error("missing license file")
 		}
 	})
 
