@@ -8,24 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-
-	"github.com/pkg/errors"
 )
-
-// buildRetool builds retool in a temporary directory and returns the path to the built binary
-func buildRetool() (string, error) {
-	dir, err := ioutil.TempDir("", "")
-	if err != nil {
-		return "", errors.Wrap(err, "unable to create temporary build directory")
-	}
-	output := filepath.Join(dir, "retool")
-	cmd := exec.Command("go", "build", "-o", output, ".")
-	_, err = cmd.Output()
-	if err != nil {
-		return "", errors.Wrap(err, "unable to build retool binary")
-	}
-	return output, nil
-}
 
 func TestRetool(t *testing.T) {
 	// These integration tests require more than most go tests: they require a go compiler to build
@@ -36,7 +19,7 @@ func TestRetool(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer func() {
-		_ = os.Remove(retool)
+		_ = os.RemoveAll(filepath.Dir(retool))
 	}()
 
 	t.Run("cache pollution", func(t *testing.T) {
@@ -137,10 +120,7 @@ func TestRetool(t *testing.T) {
 		}
 
 		// Now the binary should be installed
-		_, err = os.Stat(filepath.Join(dir, "_tools", "bin", "retool"))
-		if err != nil {
-			t.Fatalf("unable to stat _tools/bin/retool after calling retool build: %s", err)
-		}
+		assertBinInstalled(t, dir, "retool")
 	})
 
 	t.Run("dep_added", func(t *testing.T) {
