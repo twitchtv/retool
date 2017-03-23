@@ -100,6 +100,12 @@ func clean(pkgs []string) {
 			return nil
 		}
 
+		// If the path is a directory that's specially marked for preservation, keep
+		// it and all its contents.
+		if info.IsDir() && preserveDirectory(path) {
+			return filepath.SkipDir
+		}
+
 		// If the folder is a kept package or a parent, don't delete it and keep recursing
 		for p := range deps {
 			if strings.HasPrefix(p, pkg) {
@@ -170,6 +176,23 @@ func isLegalFile(filename string) bool {
 	}
 	for _, s := range commonLegalFileSubstrings {
 		if strings.Contains(base, s) {
+			return true
+		}
+	}
+	return false
+}
+
+// List of directories that should be completely preserved if they are present.
+var preservedDirectories = []string{
+	// gometalinter vendors its own linters and relies on this directory's
+	// existence. See issue #7.
+	filepath.Join("github.com", "alecthomas", "gometalinter", "_linters"),
+}
+
+// checks whether path is in the list of preserved directories.
+func preserveDirectory(path string) bool {
+	for _, d := range preservedDirectories {
+		if strings.HasSuffix(path, d) {
 			return true
 		}
 	}
