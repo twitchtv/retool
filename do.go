@@ -18,7 +18,12 @@ func setPath() (unset func()) {
 
 func setGoEnv() (unset func()) {
 	prevGoPath, goPathWasSet := os.LookupEnv("GOPATH")
-	newGoPath := toolDirPath
+	var newGoPath string
+	if goPathWasSet {
+		newGoPath = prevGoPath + string(os.PathListSeparator) + toolDirPath
+	} else {
+		newGoPath = toolDirPath
+	}
 	_ = os.Setenv("GOPATH", newGoPath)
 
 	prevGoBin, goBinWasSet := os.LookupEnv("GOBIN")

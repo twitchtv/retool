@@ -144,8 +144,8 @@ func TestRetool(t *testing.T) {
 			t.Fatalf("unable to create file for gometalinter to run against: %s", err)
 		}
 		defer func() {
-			if err := f.Close(); err != nil {
-				t.Errorf("unable to close gometalinter test file: %s", err)
+			if closeErr := f.Close(); closeErr != nil {
+				t.Errorf("unable to close gometalinter test file: %s", closeErr)
 			}
 		}()
 		_, err = io.WriteString(f, `package main
