@@ -8,44 +8,57 @@ import (
 	"strings"
 )
 
-func clean(pkgs []string) {
-	// This is rude but shouldn't be an issue...
-	build.Default.GOPATH = toolDirPath
+type stringSet map[string]struct{}
 
-	// A recursive helper to take a list of packages and find their dependencies deeply
-	keep := map[string]struct{}{}
-	var resolve func(string, []string) []string
-	resolve = func(parent string, pkgs []string) []string {
-		var r []string
+func (ss stringSet) add(val string) { ss[val] = struct{}{} }
+func (ss stringSet) has(val string) bool {
+	_, ok := ss[val]
+	return ok
+}
+
+// compute the set of dependencies for a list of packages. The packages must
+// already be present in toolDirPath.
+func dependencies(pkgs []string) stringSet {
+	deps := stringSet{}
+
+	buildCtx := build.Default
+	buildCtx.GOPATH = toolDirPath
+
+	var resolve func(string, []string)
+	resolve = func(parent string, pkgs []string) {
 		for _, pkg := range pkgs {
 			if !strings.Contains(pkg, ".") {
 				continue
 			}
 
-			p, err := build.Default.Import(pkg, filepath.Join(toolDirPath, "src", parent), 0)
+			p, err := buildCtx.Import(pkg, filepath.Join(toolDirPath, "src", parent), 0)
 			if err != nil {
 				fatal(fmt.Sprintf("couldn't import package %q", pkg), err)
 			}
 
-			if _, ok := keep[p.ImportPath]; ok {
+			if deps.has(p.ImportPath) {
 				continue
 			}
 
-			keep[p.ImportPath] = struct{}{}
-			r = append(r, p.ImportPath)
-			r = append(r, resolve(p.ImportPath, p.Imports)...)
+			deps.add(p.ImportPath)
+			resolve(p.ImportPath, p.Imports)
 		}
-		return r
 	}
 
 	resolve("", pkgs)
 
+	return deps
+}
+
+// Remove unused files and unused packages from toolDirPath.
+func clean(pkgs []string) {
+	deps := dependencies(pkgs)
 	base := filepath.Join(toolDirPath, "src")
 
 	// Resolve any symlinks in the packages to keep, because we're going
 	// to walk through the file system, so we need to trim stuff by
 	// _filename_.
-	for pkgPath := range keep {
+	for pkgPath := range deps {
 		fullPath := filepath.Join(base, pkgPath)
 		resolved, err := filepath.EvalSymlinks(fullPath)
 		if err != nil {
@@ -56,7 +69,7 @@ func clean(pkgs []string) {
 		if err != nil {
 			fatal(fmt.Sprintf("couldn't eval symlinks in %q", pkgPath), err)
 		}
-		keep[pkgPath] = struct{}{}
+		deps.add(pkgPath)
 	}
 
 	var toDelete []string
@@ -81,15 +94,14 @@ func clean(pkgs []string) {
 		// tools, and any non-go, non-legal files in packages we *do* need.
 		if info.Mode().IsRegular() {
 			pkg = filepath.Dir(pkg)
-			_, keptPkg := keep[pkg]
-			if !(keptPkg && keepFile(path)) {
+			if !(deps.has(pkg) && keepFile(path)) {
 				toDelete = append(toDelete, path)
 			}
 			return nil
 		}
 
 		// If the folder is a kept package or a parent, don't delete it and keep recursing
-		for p := range keep {
+		for p := range deps {
 			if strings.HasPrefix(p, pkg) {
 				return nil
 			}
@@ -99,6 +111,7 @@ func clean(pkgs []string) {
 		toDelete = append(toDelete, path)
 		return filepath.SkipDir
 	})
+
 	if err != nil {
 		fatal("unable to clean _tools", err)
 	}
