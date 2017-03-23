@@ -155,6 +155,19 @@ func TestRetool(t *testing.T) {
 		}
 	})
 
+	t.Run("clean", func(t *testing.T) {
+		// Clean should be a noop, but kept around for compatibility
+		cmd := exec.Command(retool, "clean")
+		_, err := cmd.Output()
+		if err != nil {
+			if exitErr, ok := err.(*exec.ExitError); ok {
+				t.Fatalf("expected no errors when using retool clean, have this:\n%s", string(exitErr.Stderr))
+			} else {
+				t.Fatalf("unexpected err when running %q: %q", strings.Join(cmd.Args, " "), err)
+			}
+		}
+	})
+
 	t.Run("do", func(t *testing.T) {
 		dir, err := ioutil.TempDir("", "")
 		if err != nil {
@@ -187,7 +200,57 @@ func TestRetool(t *testing.T) {
 				t.Fatalf("unexpected err when running %q: %q", strings.Join(cmd.Args, " "), err)
 			}
 		}
+
 		if want := "retool v1.0.1"; string(out) != want {
+			t.Errorf("have=%q, want=%q", string(out), want)
+		}
+	})
+
+	t.Run("upgrade", func(t *testing.T) {
+		dir, err := ioutil.TempDir("", "")
+		if err != nil {
+			t.Fatalf("unable to make temp dir: %s", err)
+		}
+		defer func() {
+			_ = os.RemoveAll(dir)
+		}()
+
+		cmd := exec.Command(retool, "-base-dir", dir, "add",
+			"github.com/twitchtv/retool", "v1.0.1",
+		)
+		cmd.Dir = dir
+		_, err = cmd.Output()
+		if err != nil {
+			if exitErr, ok := err.(*exec.ExitError); ok {
+				t.Fatalf("expected no errors when using retool add, have this:\n%s", string(exitErr.Stderr))
+			} else {
+				t.Fatalf("unexpected err when running %q: %q", strings.Join(cmd.Args, " "), err)
+			}
+		}
+
+		cmd = exec.Command(retool, "-base-dir", dir, "upgrade",
+			"github.com/twitchtv/retool", "v1.0.3",
+		)
+		cmd.Dir = dir
+		_, err = cmd.Output()
+		if err != nil {
+			if exitErr, ok := err.(*exec.ExitError); ok {
+				t.Fatalf("expected no errors when using retool upgrade, have this:\n%s", string(exitErr.Stderr))
+			}
+		}
+
+		cmd = exec.Command(retool, "do", "retool", "version")
+		cmd.Dir = dir
+		out, err := cmd.Output()
+		if err != nil {
+			if exitErr, ok := err.(*exec.ExitError); ok {
+				t.Fatalf("expected no errors when using retool do, have this:\n%s", string(exitErr.Stderr))
+			} else {
+				t.Fatalf("unexpected err when running %q: %q", strings.Join(cmd.Args, " "), err)
+			}
+		}
+
+		if want := "retool v1.0.3"; string(out) != want {
 			t.Errorf("have=%q, want=%q", string(out), want)
 		}
 	})

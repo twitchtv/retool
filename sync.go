@@ -1,9 +1,6 @@
 package main
 
-import (
-	"os/exec"
-	"path/filepath"
-)
+import "os/exec"
 
 func (s spec) sync() {
 	m := getManifest()
@@ -23,19 +20,12 @@ func (s spec) sync() {
 			fatal("failed to ensure tool dir", err)
 		}
 
-		// Download everything to cache
+		// Download everything to tool directory
 		for _, t := range s.Tools {
 			err = download(t)
 			if err != nil {
 				fatalExec("failed to sync "+t.Repository, err)
 			}
-		}
-
-		// Copy the cache into the tools directory
-		cmd = exec.Command("cp", "-R", filepath.Join(cacheDir, "src"), filepath.Join(toolDirPath, "src"))
-		_, err = cmd.Output()
-		if err != nil {
-			fatalExec("failed to copy data from cache ", err)
 		}
 
 		// Install the packages

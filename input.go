@@ -114,7 +114,7 @@ func printUsageAndExit(command string, exitCode int) {
 	os.Exit(exitCode)
 }
 
-const usage = `usage: retool (add | remove | upgrade | sync | do | clean | build | help)
+const usage = `usage: retool (add | remove | upgrade | sync | do | build | help)
 
 use retool with a subcommand:
 
@@ -124,7 +124,6 @@ upgrade will upgrade a tool
 sync will synchronize your _tools with tools.json, downloading if necessary
 build will compile all the tools in _tools
 do will run stuff using your installed tools
-clean will delete the repo cache stored at ~/.retool
 
 help [command] will describe a command in more detail
 version will print the installed version of retool
@@ -187,11 +186,7 @@ That works too.
 
 const cleanUsage = `usage: retool clean
 
-retool clean will delete the repo cache stored at ~/.retool
-
-This is just
-  rm -rf ~/.retool
-That works too.
+retool clean has no effect, but still exists for compatibility.
 `
 
 const buildUsage = `usage: retool build
