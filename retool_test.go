@@ -23,13 +23,8 @@ func TestRetool(t *testing.T) {
 	}()
 
 	t.Run("cache pollution", func(t *testing.T) {
-		dir, err := ioutil.TempDir("", "")
-		if err != nil {
-			t.Fatalf("unable to make temp dir: %s", err)
-		}
-		defer func() {
-			_ = os.RemoveAll(dir)
-		}()
+		dir, cleanup := setupTempDir(t)
+		defer cleanup()
 
 		// This should fail because this version of mockery has an import line that points to uber's
 		// internal repo, which can't be reached:
@@ -49,34 +44,19 @@ func TestRetool(t *testing.T) {
 	})
 
 	t.Run("version", func(t *testing.T) {
-		dir, err := ioutil.TempDir("", "")
-		if err != nil {
-			t.Fatalf("unable to make temp dir: %s", err)
-		}
-		defer func() {
-			_ = os.RemoveAll(dir)
-		}()
+		dir, cleanup := setupTempDir(t)
+		defer cleanup()
 
 		// Should work even in a directory without tools.json
-		cmd := exec.Command(retool, "version")
-		cmd.Dir = dir
-		out, err := cmd.Output()
-		if err != nil {
-			t.Fatalf("expected no errors when using retool version, have this:\n%s", string(out))
-		}
+		out := runRetoolCmd(t, dir, retool, "version")
 		if want := fmt.Sprintf("retool %s", version); string(out) != want {
 			t.Errorf("have=%q, want=%q", string(out), want)
 		}
 	})
 
 	t.Run("build", func(t *testing.T) {
-		dir, err := ioutil.TempDir("", "")
-		if err != nil {
-			t.Fatalf("unable to make temp dir: %s", err)
-		}
-		defer func() {
-			_ = os.RemoveAll(dir)
-		}()
+		dir, cleanup := setupTempDir(t)
+		defer cleanup()
 		runRetoolCmd(t, dir, retool, "add", "github.com/twitchtv/retool", "origin/master")
 
 		// Suppose we only have _tools/src available. Does `retool build` work?
@@ -97,13 +77,8 @@ func TestRetool(t *testing.T) {
 	})
 
 	t.Run("dep_added", func(t *testing.T) {
-		dir, err := ioutil.TempDir("", "")
-		if err != nil {
-			t.Fatalf("unable to make temp dir: %s", err)
-		}
-		defer func() {
-			_ = os.RemoveAll(dir)
-		}()
+		dir, cleanup := setupTempDir(t)
+		defer cleanup()
 
 		// Use a package which used to have a dependency (in this case, one on
 		// github.com/spenczar/retool_test_lib), but doesn't have that dependency for HEAD of
@@ -112,13 +87,8 @@ func TestRetool(t *testing.T) {
 	})
 
 	t.Run("do", func(t *testing.T) {
-		dir, err := ioutil.TempDir("", "")
-		if err != nil {
-			t.Fatalf("unable to make temp dir: %s", err)
-		}
-		defer func() {
-			_ = os.RemoveAll(dir)
-		}()
+		dir, cleanup := setupTempDir(t)
+		defer cleanup()
 
 		runRetoolCmd(t, dir, retool, "add", "github.com/twitchtv/retool", "v1.0.1")
 		output := runRetoolCmd(t, dir, retool, "do", "retool", "version")
@@ -141,4 +111,19 @@ func runRetoolCmd(t *testing.T, dir, retool string, args ...string) (output stri
 		}
 	}
 	return string(out)
+}
+
+func setupTempDir(t *testing.T) (dir string, cleanup func()) {
+	dir, err := ioutil.TempDir("", "")
+	if err != nil {
+		t.Fatalf("unable to make temp dir: %s", err)
+	}
+
+	cleanup = func() {
+		if err := os.RemoveAll(dir); err != nil {
+			t.Errorf("unable to clean up temp dir: %s", err)
+		}
+	}
+
+	return dir, cleanup
 }
