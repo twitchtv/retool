@@ -13,6 +13,15 @@ func setPath() error {
 	return os.Setenv("PATH", newPath)
 }
 
+// setGoEnv sets GOBIN and GOPATH to point to _tools/bin and $GOPATH:_tools,
+// respectively. This is done for github.com/alecthomas/gometalinter
+// compatibility: gometalinter vendors its own linters, and checks for their
+// existence by checking in each GOPATH entry for
+// src/github.com/alecthomas/gometalinter/_linters.
+//
+// GOBIN is set so gometalinter will use it to decide where to put its vendored
+// linters with the gometalinter --install command, and so that it prefers the
+// binaries built in _tools/bin when executing linters.
 func setGoEnv() error {
 	newGoBin := filepath.Join(toolDirPath, "bin")
 	if err := os.Setenv("GOBIN", newGoBin); err != nil {
@@ -20,7 +29,7 @@ func setGoEnv() error {
 	}
 
 	prevGoPath := os.Getenv("GOPATH")
-	newGoPath := toolDirPath + string(os.PathListSeparator) + prevGoPath
+	newGoPath := prevGoPath + string(os.PathListSeparator) + toolDirPath
 	return os.Setenv("GOPATH", newGoPath)
 }
 
