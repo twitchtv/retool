@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -86,6 +87,19 @@ func TestRetool(t *testing.T) {
 		runRetoolCmd(t, dir, retool, "add", "github.com/spenczar/retool_test_app", "origin/has_dep")
 	})
 
+	t.Run("clean", func(t *testing.T) {
+		// Clean should be a noop, but kept around for compatibility
+		cmd := exec.Command(retool, "clean")
+		_, err := cmd.Output()
+		if err != nil {
+			if exitErr, ok := err.(*exec.ExitError); ok {
+				t.Fatalf("expected no errors when using retool clean, have this:\n%s", string(exitErr.Stderr))
+			} else {
+				t.Fatalf("unexpected err when running %q: %q", strings.Join(cmd.Args, " "), err)
+			}
+		}
+	})
+
 	t.Run("do", func(t *testing.T) {
 		dir, cleanup := setupTempDir(t)
 		defer cleanup()
@@ -96,6 +110,58 @@ func TestRetool(t *testing.T) {
 			t.Errorf("have=%q, want=%q", output, want)
 		}
 	})
+
+	t.Run("upgrade", func(t *testing.T) {
+		dir, cleanup := setupTempDir(t)
+		defer cleanup()
+		runRetoolCmd(t, dir, retool, "add", "github.com/twitchtv/retool", "v1.0.1")
+		runRetoolCmd(t, dir, retool, "upgrade", "github.com/twitchtv/retool", "v1.0.3")
+		out := runRetoolCmd(t, dir, retool, "do", "retool", "version")
+		if want := "retool v1.0.3"; string(out) != want {
+			t.Errorf("have=%q, want=%q", string(out), want)
+		}
+	})
+	t.Run("gometalinter exemption", func(t *testing.T) {
+		dir, err := ioutil.TempDir("", "")
+		if err != nil {
+			t.Fatalf("unable to make temp dir: %s", err)
+		}
+		defer func() {
+			_ = os.RemoveAll(dir)
+		}()
+
+		runRetoolCmd(t, dir, retool, "add", "github.com/alecthomas/gometalinter", "origin/master")
+		runRetoolCmd(t, dir, retool, "do", "gometalinter", "--install")
+
+		// Create a dummy go file so gometalinter runs. If we don't do this,
+		// gometalinter will exit without doing any work, and we'll get a false
+		// positive.
+		//
+		// The file will be removed with the deferred os.RemoveAll(dir) call, no
+		// need to remove it here.
+		f, err := os.Create(filepath.Join(dir, "main.go"))
+		if err != nil {
+			t.Fatalf("unable to create file for gometalinter to run against: %s", err)
+		}
+		defer func() {
+			if closeErr := f.Close(); closeErr != nil {
+				t.Errorf("unable to close gometalinter test file: %s", closeErr)
+			}
+		}()
+		_, err = io.WriteString(f, `package main
+
+func main() {}`)
+		if err != nil {
+			t.Fatalf("unable to write gometalinter test file: %s", err)
+		}
+
+		// If gometalinter can't find its tools, it will exit with code 2.
+		runRetoolCmd(t, dir, retool, "do", "gometalinter", ".")
+
+		// Make sure gometalinter installs to the tool directory, not to the global
+		// GOPATH.
+		assertBinInstalled(t, dir, "structcheck")
+	})
 }
 
 func runRetoolCmd(t *testing.T, dir, retool string, args ...string) (output string) {
@@ -105,7 +171,7 @@ func runRetoolCmd(t *testing.T, dir, retool string, args ...string) (output stri
 	out, err := cmd.Output()
 	if err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok {
-			t.Fatalf("command %q failed: %s", "retool "+strings.Join(cmd.Args[1:], " "), string(exitErr.Stderr))
+			t.Fatalf("command %q failed, stderr:\n%s\n\nstdout:%s", "retool "+strings.Join(cmd.Args[1:], " "), string(exitErr.Stderr), string(out))
 		} else {
 			t.Fatalf("unexpected err when running %q: %q", strings.Join(cmd.Args, " "), err)
 		}

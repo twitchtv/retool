@@ -4,27 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"os/user"
-	"path/filepath"
 )
 
-const version = "v1.1.0"
-
-var cacheDir = ""
-
-func init() {
-	u, err := user.Current()
-	if err == nil && u.HomeDir != "" {
-		cacheDir = filepath.Join(u.HomeDir, ".retool")
-	} else {
-		cwd, err := os.Getwd()
-		if err == nil {
-			cacheDir = filepath.Join(cwd, ".retool")
-		} else {
-			cacheDir = ".retool"
-		}
-	}
-}
+const version = "v1.2.0"
 
 func main() {
 	flag.Parse()
@@ -69,10 +51,7 @@ func main() {
 		s.sync()
 		do()
 	case "clean":
-		err = os.RemoveAll(cacheDir)
-		if err != nil {
-			fatal("Failure during clean", err)
-		}
+		log("the clean subcommand is deprecated and has no effect")
 	default:
 		fatal(fmt.Sprintf("unknown cmd %q", cmd), nil)
 	}
