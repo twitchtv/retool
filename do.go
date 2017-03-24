@@ -7,41 +7,15 @@ import (
 	"strings"
 )
 
-func setPath() (unset func()) {
+func setPath() error {
 	prevpath := os.Getenv("PATH")
 	newPath := filepath.Join(toolDirPath, "bin") + string(os.PathListSeparator) + prevpath
-	_ = os.Setenv("PATH", newPath)
-	return func() {
-		_ = os.Setenv("PATH", prevpath)
-	}
+	return os.Setenv("PATH", newPath)
 }
 
-func setGoEnv() (unset func()) {
-	prevGoPath, goPathWasSet := os.LookupEnv("GOPATH")
-	var newGoPath string
-	if goPathWasSet {
-		newGoPath = prevGoPath + string(os.PathListSeparator) + toolDirPath
-	} else {
-		newGoPath = toolDirPath
-	}
-	_ = os.Setenv("GOPATH", newGoPath)
-
-	prevGoBin, goBinWasSet := os.LookupEnv("GOBIN")
+func setGoBin() error {
 	newGoBin := filepath.Join(toolDirPath, "bin")
-	_ = os.Setenv("GOBIN", newGoBin)
-
-	return func() {
-		if goPathWasSet {
-			_ = os.Setenv("GOPATH", prevGoPath)
-		} else {
-			_ = os.Unsetenv("GOPATH")
-		}
-		if goBinWasSet {
-			_ = os.Setenv("GOBIN", prevGoBin)
-		} else {
-			_ = os.Unsetenv("GOBIN")
-		}
-	}
+	return os.Setenv("GOBIN", newGoBin)
 }
 
 func do() {
@@ -50,11 +24,12 @@ func do() {
 		fatal("no command passed to retool do", nil)
 	}
 
-	unsetPath := setPath()
-	defer unsetPath()
-
-	unsetGoEnv := setGoEnv()
-	defer unsetGoEnv()
+	if err := setPath(); err != nil {
+		fatal("unable to set PATH", err)
+	}
+	if err := setGoBin(); err != nil {
+		fatal("unable to set GOBIN", err)
+	}
 
 	cmd := exec.Command(args[0], args[1:]...)
 	cmd.Stdin = os.Stdin
