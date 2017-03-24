@@ -13,9 +13,15 @@ func setPath() error {
 	return os.Setenv("PATH", newPath)
 }
 
-func setGoBin() error {
+func setGoEnv() error {
 	newGoBin := filepath.Join(toolDirPath, "bin")
-	return os.Setenv("GOBIN", newGoBin)
+	if err := os.Setenv("GOBIN", newGoBin); err != nil {
+		return err
+	}
+
+	prevGoPath := os.Getenv("GOPATH")
+	newGoPath := toolDirPath + string(os.PathListSeparator) + prevGoPath
+	return os.Setenv("GOPATH", newGoPath)
 }
 
 func do() {
@@ -27,9 +33,12 @@ func do() {
 	if err := setPath(); err != nil {
 		fatal("unable to set PATH", err)
 	}
-	if err := setGoBin(); err != nil {
-		fatal("unable to set GOBIN", err)
+	if err := setGoEnv(); err != nil {
+		fatal("unable to set up go environment variables", err)
 	}
+
+	unsetGoEnv := setGoEnv()
+	defer unsetGoEnv()
 
 	cmd := exec.Command(args[0], args[1:]...)
 	cmd.Stdin = os.Stdin
