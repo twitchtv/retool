@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-const version = "v1.2.0-dev"
+const version = "v1.2.0"
 
 func main() {
 	flag.Parse()
