@@ -37,9 +37,6 @@ func do() {
 		fatal("unable to set up go environment variables", err)
 	}
 
-	unsetGoEnv := setGoEnv()
-	defer unsetGoEnv()
-
 	cmd := exec.Command(args[0], args[1:]...)
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = os.Stderr
