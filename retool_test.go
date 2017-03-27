@@ -71,7 +71,7 @@ func TestRetool(t *testing.T) {
 		assertBinInstalled(t, dir, "retool")
 
 		// Legal files should be kept around
-		_, err = os.Stat(filepath.Join(dir, "_tools", "src", "github.com", "twitchtv", "retool", "LICENSE"))
+		_, err = os.Stat(filepath.Join(dir, "_tools", "retool", "src", "github.com", "twitchtv", "retool", "LICENSE"))
 		if err != nil {
 			t.Error("missing license file")
 		}
@@ -85,6 +85,22 @@ func TestRetool(t *testing.T) {
 		// github.com/spenczar/retool_test_lib), but doesn't have that dependency for HEAD of
 		// origin/master today.
 		runRetoolCmd(t, dir, retool, "add", "github.com/spenczar/retool_test_app", "origin/has_dep")
+	})
+
+	t.Run("multiple_deps_added", func(t *testing.T) {
+		dir, cleanup := setupTempDir(t)
+		defer cleanup()
+
+		// Use a package which used to have a dependency (in this case, one on
+		// github.com/spenczar/retool_test_lib), but doesn't have that dependency for HEAD of
+		// origin/master today.
+		runRetoolCmd(t, dir, retool, "add", "github.com/spenczar/retool_test_app", "origin/has_dep")
+		runRetoolCmd(t, dir, retool, "add", "github.com/twitchtv/retool", "origin/master")
+
+		// Now the binary should be installed
+		assertBinInstalled(t, dir, "retool")
+		assertBinInstalled(t, dir, "retool_test_app")
+
 	})
 
 	t.Run("clean", func(t *testing.T) {
@@ -186,6 +202,14 @@ func setupTempDir(t *testing.T) (dir string, cleanup func()) {
 	}
 
 	cleanup = func() {
+		cmd := exec.Command("/usr/bin/tree", "-L", "3", dir)
+		out, err := cmd.Output()
+		if err != nil {
+			fmt.Print(err)
+		} else {
+			fmt.Print(string(out))
+
+		}
 		if err := os.RemoveAll(dir); err != nil {
 			t.Errorf("unable to clean up temp dir: %s", err)
 		}

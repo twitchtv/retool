@@ -18,7 +18,12 @@ type tool struct {
 }
 
 func (t *tool) path() string {
-	return filepath.Join(toolDirPath, "src", t.Repository)
+	return filepath.Join(t.gopath(), "src", t.Repository)
+}
+
+func (t *tool) gopath() string {
+	s := strings.Split(t.Repository, "/")
+	return filepath.Join(toolDirPath, s[len(s)-1])
 }
 
 func (t *tool) executable() string {
@@ -27,12 +32,14 @@ func (t *tool) executable() string {
 
 func setEnvVar(cmd *exec.Cmd, key, val string) {
 	var env []string
+	// test if we added a var to this command before
 	if cmd.Env != nil {
 		env = cmd.Env
 	} else {
 		env = os.Environ()
 	}
 
+	// if we already have a key set for this var mutate it
 	envSet := false
 	for i, envVar := range env {
 		if strings.HasPrefix(envVar, key+"=") {
@@ -40,17 +47,20 @@ func setEnvVar(cmd *exec.Cmd, key, val string) {
 			envSet = true
 		}
 	}
+	// otherwise add it to our list
 	if !envSet {
-		env = append(cmd.Env, key+"="+val)
+		env = append(env, key+"="+val)
 	}
 
+	// set the env
 	cmd.Env = env
 }
 
 func get(t *tool) error {
 	log("downloading " + t.Repository)
 	cmd := exec.Command("go", "get", "-d", t.Repository)
-	setEnvVar(cmd, "GOPATH", toolDirPath)
+	setEnvVar(cmd, "GOBIN", filepath.Join(toolDirPath, "bin"))
+	setEnvVar(cmd, "GOPATH", t.gopath())
 	_, err := cmd.Output()
 	if err != nil {
 		return errors.Wrap(err, "failed to 'go get' tool")
@@ -108,7 +118,8 @@ func setVersion(t *tool) error {
 
 	// Re-run 'go get' in case the new version has a different set of dependencies.
 	cmd = exec.Command("go", "get", "-d", t.Repository)
-	setEnvVar(cmd, "GOPATH", toolDirPath)
+	setEnvVar(cmd, "GOBIN", filepath.Join(toolDirPath, "bin"))
+	setEnvVar(cmd, "GOPATH", t.gopath())
 	_, err = cmd.Output()
 	if err != nil {
 		return errors.Wrap(err, "failed to 'go get' tool")
@@ -133,7 +144,9 @@ func download(t *tool) error {
 func install(t *tool) error {
 	log("installing " + t.Repository)
 	cmd := exec.Command("go", "install", t.Repository)
-	setEnvVar(cmd, "GOPATH", toolDirPath)
+	setEnvVar(cmd, "GOBIN", filepath.Join(toolDirPath, "bin"))
+	setEnvVar(cmd, "GOPATH", t.gopath())
+	fmt.Println(cmd.Env)
 	_, err := cmd.Output()
 	if err != nil {
 		return errors.Wrap(err, "failed to 'go install' tool")

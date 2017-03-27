@@ -17,12 +17,12 @@ func (ss stringSet) has(val string) bool {
 }
 
 // compute the set of dependencies for a list of packages. The packages must
-// already be present in toolDirPath.
-func dependencies(pkgs []string) stringSet {
+// already be present in toolGoPath.
+func dependencies(toolGoPath string, pkgs []string) stringSet {
 	deps := stringSet{}
 
 	buildCtx := build.Default
-	buildCtx.GOPATH = toolDirPath
+	buildCtx.GOPATH = toolGoPath
 
 	var resolve func(string, []string)
 	resolve = func(parent string, pkgs []string) {
@@ -31,7 +31,7 @@ func dependencies(pkgs []string) stringSet {
 				continue
 			}
 
-			p, err := buildCtx.Import(pkg, filepath.Join(toolDirPath, "src", parent), 0)
+			p, err := buildCtx.Import(pkg, filepath.Join(toolGoPath, "src", parent), 0)
 			if err != nil {
 				fatal(fmt.Sprintf("couldn't import package %q", pkg), err)
 			}
@@ -50,10 +50,10 @@ func dependencies(pkgs []string) stringSet {
 	return deps
 }
 
-// Remove unused files and unused packages from toolDirPath.
-func clean(pkgs []string) {
-	deps := dependencies(pkgs)
-	base := filepath.Join(toolDirPath, "src")
+// Remove unused files and unused packages from toolGoPath.
+func clean(toolGoPath string, pkgs []string) {
+	deps := dependencies(toolGoPath, pkgs)
+	base := filepath.Join(toolGoPath, "src")
 
 	// Resolve any symlinks in the packages to keep, because we're going
 	// to walk through the file system, so we need to trim stuff by

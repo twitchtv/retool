@@ -22,18 +22,21 @@ func setPath() error {
 // GOBIN is set so gometalinter will use it to decide where to put its vendored
 // linters with the gometalinter --install command, and so that it prefers the
 // binaries built in _tools/bin when executing linters.
-func setGoEnv() error {
+func setGoEnv(tools []*tool) error {
 	newGoBin := filepath.Join(toolDirPath, "bin")
 	if err := os.Setenv("GOBIN", newGoBin); err != nil {
 		return err
 	}
 
 	prevGoPath := os.Getenv("GOPATH")
-	newGoPath := prevGoPath + string(os.PathListSeparator) + toolDirPath
-	return os.Setenv("GOPATH", newGoPath)
+	newGoPath := []string{prevGoPath}
+	for _, t := range tools {
+		newGoPath = append(newGoPath, t.gopath())
+	}
+	return os.Setenv("GOPATH", strings.Join(newGoPath, string(os.PathListSeparator)))
 }
 
-func do() {
+func (s spec) do() {
 	args := positionalArgs
 	if len(args) == 0 {
 		fatal("no command passed to retool do", nil)
@@ -42,7 +45,7 @@ func do() {
 	if err := setPath(); err != nil {
 		fatal("unable to set PATH", err)
 	}
-	if err := setGoEnv(); err != nil {
+	if err := setGoEnv(s.Tools); err != nil {
 		fatal("unable to set up go environment variables", err)
 	}
 
