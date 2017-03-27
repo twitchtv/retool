@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -143,11 +145,16 @@ func download(t *tool) error {
 
 func install(t *tool) error {
 	log("installing " + t.Repository)
+
+	err := ioutil.WriteFile(path.Join(t.gopath(), ".gitignore"), gitignore, 0664)
+	if err != nil {
+		return errors.Wrap(err, "unable to update .gitignore")
+	}
+
 	cmd := exec.Command("go", "install", t.Repository)
 	setEnvVar(cmd, "GOBIN", filepath.Join(toolDirPath, "bin"))
 	setEnvVar(cmd, "GOPATH", t.gopath())
-	fmt.Println(cmd.Env)
-	_, err := cmd.Output()
+	_, err = cmd.Output()
 	if err != nil {
 		return errors.Wrap(err, "failed to 'go install' tool")
 	}

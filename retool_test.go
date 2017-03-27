@@ -202,14 +202,6 @@ func setupTempDir(t *testing.T) (dir string, cleanup func()) {
 	}
 
 	cleanup = func() {
-		cmd := exec.Command("/usr/bin/tree", "-L", "3", dir)
-		out, err := cmd.Output()
-		if err != nil {
-			fmt.Print(err)
-		} else {
-			fmt.Print(string(out))
-
-		}
 		if err := os.RemoveAll(dir); err != nil {
 			t.Errorf("unable to clean up temp dir: %s", err)
 		}
