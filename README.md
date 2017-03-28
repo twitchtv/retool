@@ -12,7 +12,7 @@ tool).
 
 Some examples of tools:
 
- - [github.com/tools/godep](github.com/tools/godep) is a tool to
+ - [github.com/tools/godep](https://github.com/tools/godep) is a tool to
    vendor Go packages.
  - [github.com/golang/protobuf/protoc-gen-go](https://github.com/golang/protobuf/protoc-gen-go)
    is a tool to compile Go code from protobuf definitions.
