@@ -12,17 +12,17 @@ func TestSpecVersioning(t *testing.T) {
 		return func(t *testing.T) {
 			t.Parallel()
 			path := filepath.Join("testdata", "specs", file)
-			spec, err := readPath(path)
+			s, err := readPath(path)
 			if err != nil {
 				t.Fatalf("unable to read spec file: %s", err)
 			}
 
 			if wantVersion == nil {
-				if spec.RetoolVersion != nil {
-					t.Errorf("unexpected spec retool version, have=%q want=nil", spec.RetoolVersion, nil)
+				if s.RetoolVersion != nil {
+					t.Errorf("unexpected spec retool version, have=%q want=nil", s.RetoolVersion)
 				}
-			} else if !spec.RetoolVersion.Equal(wantVersion) {
-				t.Errorf("unexpected spec retool version, have=%q want=%q", spec.RetoolVersion, wantVersion)
+			} else if !s.RetoolVersion.Equal(wantVersion) {
+				t.Errorf("unexpected spec retool version, have=%q want=%q", s.RetoolVersion, wantVersion)
 			}
 		}
 	}
