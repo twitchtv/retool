@@ -31,7 +31,7 @@ func TestCompatibility(t *testing.T) {
 			defer installCleanup()
 
 			runRetoolCmd(t, installDir, newRetool, "add", "github.com/twitchtv/retool", oldVersion)
-			oldRetool := filepath.Join(installDir, "_tools", "bin", "retool")
+			oldRetool := filepath.Join(installDir, "_tools", "bin", "retool"+osBinSuffix)
 
 			t.Run("parallel tests", func(t *testing.T) {
 				// The extra t.Run("parallel tests" grouping here is necessary to make

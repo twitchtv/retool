@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/pkg/errors"
 )
 
 func TestRetool(t *testing.T) {
@@ -192,4 +194,27 @@ func setupTempDir(t *testing.T) (dir string, cleanup func()) {
 	}
 
 	return dir, cleanup
+}
+
+// buildRetool builds retool in a temporary directory and returns the path to
+// the built binary
+func buildRetool() (string, error) {
+	dir, err := ioutil.TempDir("", "")
+	if err != nil {
+		return "", errors.Wrap(err, "unable to create temporary build directory")
+	}
+	output := filepath.Join(dir, "retool"+osBinSuffix)
+	cmd := exec.Command("go", "build", "-o", output, ".")
+	_, err = cmd.Output()
+	if err != nil {
+		return "", errors.Wrap(err, "unable to build retool binary")
+	}
+	return output, nil
+}
+
+func assertBinInstalled(t *testing.T, wd, bin string) {
+	_, err := os.Stat(filepath.Join(wd, "_tools", "bin", bin+osBinSuffix))
+	if err != nil {
+		t.Errorf("unable to find %s: %s", bin+osBinSuffix, err)
+	}
 }
