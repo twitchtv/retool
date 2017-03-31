@@ -35,7 +35,7 @@ func TestRetool(t *testing.T) {
 				"github.com/vektra/mockery/cmd/mockery", "d895b9fcc32730719faaccd7840ad7277c94c2d0",
 			)
 			cmd.Dir = dir
-			_, err = cmd.Output()
+			_, err := cmd.Output()
 			if err == nil {
 				t.Fatal("expected error when adding mockery at broken commit d895b9, but got no error")
 			}
@@ -75,7 +75,7 @@ func TestRetool(t *testing.T) {
 			assertBinInstalled(t, dir, "retool")
 
 			// Legal files should be kept around
-			_, err = os.Stat(filepath.Join(dir, "_tools", "src", "github.com", "twitchtv", "retool", "LICENSE"))
+			_, err := os.Stat(filepath.Join(dir, "_tools", "src", "github.com", "twitchtv", "retool", "LICENSE"))
 			if err != nil {
 				t.Error("missing license file")
 			}
