@@ -181,8 +181,19 @@ func runRetoolCmd(t *testing.T, dir, retool string, args ...string) (output stri
 	return string(out)
 }
 
+func nameOfTest(t *testing.T) string {
+	// t.Name() was added in go1.8. If it's available, use it. Otherwise, return "".
+	v, ok := interface{}(t).(interface {
+		Name() string
+	})
+	if ok {
+		return v.Name()
+	}
+	return ""
+}
+
 func setupTempDir(t *testing.T) (dir string, cleanup func()) {
-	dir, err := ioutil.TempDir("", strings.Replace(t.Name(), "/", "_", -1))
+	dir, err := ioutil.TempDir("", strings.Replace(nameOfTest(t), "/", "_", -1))
 	if err != nil {
 		t.Fatalf("unable to make temp dir: %s", err)
 	}
