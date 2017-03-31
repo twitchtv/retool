@@ -48,11 +48,9 @@ func (s spec) find(t *tool) int {
 }
 
 func (s spec) cleanup() {
-	var pkgs []string
 	for _, t := range s.Tools {
-		pkgs = append(pkgs, t.Repository)
+		clean(t.gopath(), []string{t.Repository})
 	}
-	clean(pkgs)
 }
 
 func read() (spec, error) {

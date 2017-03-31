@@ -49,7 +49,7 @@ func main() {
 		s.sync()
 	case "do":
 		s.sync()
-		do()
+		s.do()
 	case "clean":
 		log("the clean subcommand is deprecated and has no effect")
 	default:
