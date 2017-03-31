@@ -55,6 +55,21 @@ func TestRetool(t *testing.T) {
 		}
 	})
 
+	t.Run("sync", func(t *testing.T) {
+		dir, cleanup := setupTempDir(t)
+		defer cleanup()
+
+		runRetoolCmd(t, dir, retool, "add", "github.com/twitchtv/retool", "origin/master")
+
+		// Delete existing tools directory to try and trigger out of date
+		_ = os.RemoveAll(filepath.Join(dir, "_tools"))
+
+		// Should be able to sync
+		runRetoolCmd(t, dir, retool, "sync")
+
+		assertBinInstalled(t, dir, "retool")
+	})
+
 	t.Run("build", func(t *testing.T) {
 		dir, cleanup := setupTempDir(t)
 		defer cleanup()
@@ -121,6 +136,7 @@ func TestRetool(t *testing.T) {
 			t.Errorf("have=%q, want=%q", string(out), want)
 		}
 	})
+
 	t.Run("gometalinter exemption", func(t *testing.T) {
 		dir, err := ioutil.TempDir("", "")
 		if err != nil {

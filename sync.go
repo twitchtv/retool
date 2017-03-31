@@ -1,15 +1,12 @@
 package main
 
-import "os/exec"
+import "os"
 
 func (s spec) sync() {
 	m := getManifest()
 	if m.outOfDate(s.Tools) {
-		log("syncing")
-
 		// Delete existing tools directory
-		cmd := exec.Command("rm", "-r", "-f", toolDirPath)
-		_, err := cmd.Output()
+		err := os.RemoveAll(toolDirPath)
 		if err != nil {
 			fatalExec("failed to remove _tools ", err)
 		}
