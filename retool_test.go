@@ -180,7 +180,7 @@ func runRetoolCmd(t *testing.T, dir, retool string, args ...string) (output stri
 }
 
 func setupTempDir(t *testing.T) (dir string, cleanup func()) {
-	dir, err := ioutil.TempDir("", "")
+	dir, err := ioutil.TempDir("", strings.Replace(t.Name(), "/", "_", -1))
 	if err != nil {
 		t.Fatalf("unable to make temp dir: %s", err)
 	}
