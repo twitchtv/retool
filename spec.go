@@ -5,13 +5,45 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/Masterminds/semver"
 )
 
 // Filename to read/write the spec data.
 const specfile = "tools.json"
 
 type spec struct {
-	Tools []*tool
+	Tools         []*tool
+	RetoolVersion *semver.Version
+}
+
+// jsonSpec is a helper type to describe the JSON encoding of a spec
+type jsonSpec struct {
+	Tools         []*tool
+	RetoolVersion string
+}
+
+func (s *spec) UnmarshalJSON(data []byte) error {
+	js := new(jsonSpec)
+	if err := json.Unmarshal(data, js); err != nil {
+		return err
+	}
+	if js.RetoolVersion != "" {
+		v, err := semver.NewVersion(js.RetoolVersion)
+		if err != nil {
+			return err
+		}
+		s.RetoolVersion = v
+	}
+	s.Tools = js.Tools
+	return nil
+}
+
+func (s spec) MarshalJSON() ([]byte, error) {
+	return json.Marshal(&jsonSpec{
+		Tools:         s.Tools,
+		RetoolVersion: s.RetoolVersion.String(),
+	})
 }
 
 func (s spec) write() error {
@@ -24,6 +56,11 @@ func (s spec) write() error {
 	defer func() {
 		_ = f.Close()
 	}()
+
+	// s.write() is called when we have successfully added, removed, or upgraded a
+	// tool. The success of that operation indicates that we should be comfortable
+	// bumping up this version.
+	s.RetoolVersion = version
 
 	bytes, err := json.MarshalIndent(s, "", "  ")
 	if err != nil {
@@ -55,12 +92,10 @@ func (s spec) cleanup() {
 	clean(pkgs)
 }
 
-func read() (spec, error) {
-	specfilePath := filepath.Join(baseDirPath, specfile)
-
-	file, err := os.Open(specfilePath)
+func readPath(path string) (spec, error) {
+	file, err := os.Open(path)
 	if err != nil {
-		return spec{}, fmt.Errorf("unable to open spec file at %s: %s", specfile, err)
+		return spec{}, fmt.Errorf("unable to open spec file at %s: %s", path, err)
 	}
 	defer func() {
 		_ = file.Close()
@@ -72,6 +107,11 @@ func read() (spec, error) {
 		return spec{}, err
 	}
 	return *s, nil
+}
+
+func read() (spec, error) {
+	specfilePath := filepath.Join(baseDirPath, specfile)
+	return readPath(specfilePath)
 }
 
 func specExists() bool {
@@ -88,5 +128,8 @@ func specExists() bool {
 }
 
 func writeBlankSpec() error {
-	return spec{[]*tool{}}.write()
+	return spec{
+		Tools:         []*tool{},
+		RetoolVersion: version,
+	}.write()
 }

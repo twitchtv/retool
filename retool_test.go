@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/pkg/errors"
 )
 
 func TestRetool(t *testing.T) {
@@ -179,8 +181,19 @@ func runRetoolCmd(t *testing.T, dir, retool string, args ...string) (output stri
 	return string(out)
 }
 
+func nameOfTest(t *testing.T) string {
+	// t.Name() was added in go1.8. If it's available, use it. Otherwise, return "".
+	v, ok := interface{}(t).(interface {
+		Name() string
+	})
+	if ok {
+		return v.Name()
+	}
+	return ""
+}
+
 func setupTempDir(t *testing.T) (dir string, cleanup func()) {
-	dir, err := ioutil.TempDir("", "")
+	dir, err := ioutil.TempDir("", strings.Replace(nameOfTest(t), "/", "_", -1))
 	if err != nil {
 		t.Fatalf("unable to make temp dir: %s", err)
 	}
@@ -192,4 +205,27 @@ func setupTempDir(t *testing.T) (dir string, cleanup func()) {
 	}
 
 	return dir, cleanup
+}
+
+// buildRetool builds retool in a temporary directory and returns the path to
+// the built binary
+func buildRetool() (string, error) {
+	dir, err := ioutil.TempDir("", "")
+	if err != nil {
+		return "", errors.Wrap(err, "unable to create temporary build directory")
+	}
+	output := filepath.Join(dir, "retool"+osBinSuffix)
+	cmd := exec.Command("go", "build", "-o", output, ".")
+	_, err = cmd.Output()
+	if err != nil {
+		return "", errors.Wrap(err, "unable to build retool binary")
+	}
+	return output, nil
+}
+
+func assertBinInstalled(t *testing.T, wd, bin string) {
+	_, err := os.Stat(filepath.Join(wd, "_tools", "bin", bin+osBinSuffix))
+	if err != nil {
+		t.Errorf("unable to find %s: %s", bin+osBinSuffix, err)
+	}
 }

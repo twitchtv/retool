@@ -28,5 +28,6 @@
       "Repository": "github.com/gordonklaus/ineffassign",
       "Commit": "99762ed65232b1477364c8c53778f8b6503e868c"
     }
-  ]
+  ],
+  "RetoolVersion": "1.3.0"
 }
