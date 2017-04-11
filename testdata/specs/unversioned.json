@@ -1,0 +1,8 @@
+{
+    "Tools": [
+        {
+            "Repository": "github.com/golang/lint/golint",
+            "Commit": "cb00e5669539f047b2f4c53a421a01b0c8e172c6"
+        }
+    ]
+}

@@ -4,9 +4,11 @@ import (
 	"flag"
 	"fmt"
 	"os"
+
+	"github.com/Masterminds/semver"
 )
 
-const version = "v1.2.0"
+var version = semver.MustParse("v1.3.0")
 
 func main() {
 	flag.Parse()
