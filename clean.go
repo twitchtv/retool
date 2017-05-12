@@ -187,6 +187,10 @@ var preservedDirectories = []string{
 	// gometalinter vendors its own linters and relies on this directory's
 	// existence. See issue #7.
 	filepath.Join("github.com", "alecthomas", "gometalinter", "_linters"),
+
+	// sqlboiler requires template files to exist at runtime. See pull request #25.
+	filepath.Join("github.com", "vattle", "sqlboiler", "templates"),
+	filepath.Join("github.com", "vattle", "sqlboiler", "templates_test"),
 }
 
 // checks whether path is in the list of preserved directories.
