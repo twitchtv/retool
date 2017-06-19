@@ -98,6 +98,24 @@ func TestRetool(t *testing.T) {
 			}
 		})
 
+		t.Run("build_with_gobin_set", func(t *testing.T) {
+			// Set GOBIN to a directory not controlled by retool. It should still
+			// put built binaries in _tools/bin.
+			t.Parallel()
+			dir, cleanup := setupTempDir(t)
+			defer cleanup()
+			runRetoolCmd(t, dir, retool, "add", "github.com/twitchtv/retool", "origin/master")
+
+			cmd := makeRetoolCmd(t, dir, retool, "build")
+			cmd.Env = append(os.Environ(), "GOBIN="+dir)
+			err := cmd.Run()
+			if err != nil {
+				t.Fatalf("fatal go build err: %v", err)
+			}
+
+			assertBinInstalled(t, dir, "retool")
+		})
+
 		t.Run("dep_added", func(t *testing.T) {
 			t.Parallel()
 			dir, cleanup := setupTempDir(t)
@@ -190,10 +208,15 @@ func main() {}`)
 	})
 }
 
-func runRetoolCmd(t *testing.T, dir, retool string, args ...string) (output string) {
+func makeRetoolCmd(t *testing.T, dir, retool string, args ...string) *exec.Cmd {
 	args = append([]string{"-base-dir", dir}, args...)
 	cmd := exec.Command(retool, args...)
 	cmd.Dir = dir
+	return cmd
+}
+
+func runRetoolCmd(t *testing.T, dir, retool string, args ...string) (output string) {
+	cmd := makeRetoolCmd(t, dir, retool, args...)
 	out, err := cmd.Output()
 	if err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok {
