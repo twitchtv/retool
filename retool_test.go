@@ -99,8 +99,8 @@ func TestRetool(t *testing.T) {
 		})
 
 		t.Run("build_with_gobin_set", func(t *testing.T) {
-			// Set GOBIN to a directory not controlled by retool. It should still
-			// put built binaries in _tools/bin.
+			// Even if GOBIN is set to a directory not controlled by retool, running
+			// 'retool build' should still put built binaries in _tools/bin.
 			t.Parallel()
 			dir, cleanup := setupTempDir(t)
 			defer cleanup()
