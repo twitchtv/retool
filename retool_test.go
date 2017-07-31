@@ -205,18 +205,6 @@ func main() {}`)
 			// GOPATH.
 			assertBinInstalled(t, dir, "structcheck")
 		})
-		t.Run("c source files", func(t *testing.T) {
-			t.Parallel()
-			dir, err := ioutil.TempDir("", "")
-			if err != nil {
-				t.Fatalf("unable to make temp dir: %s", err)
-			}
-			defer func() {
-				_ = os.RemoveAll(dir)
-			}()
-			runRetoolCmd(t, dir, retool, "add", "github.com/spenczar/sqlite_retool_testcmd", "origin/master")
-			runRetoolCmd(t, dir, retool, "build")
-		})
 	})
 }
 
