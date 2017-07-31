@@ -140,6 +140,12 @@ func keepFile(filename string) bool {
 	if strings.HasSuffix(filename, ".s") {
 		return true
 	}
+	if strings.HasSuffix(filename, ".c") {
+		return true
+	}
+	if strings.HasSuffix(filename, ".h") {
+		return true
+	}
 	if isLegalFile(filename) {
 		return true
 	}

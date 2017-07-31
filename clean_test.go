@@ -49,6 +49,9 @@ func TestKeep(t *testing.T) {
 
 	testcase("assembly.s", true)
 	testcase("notassembly.as", false)
+	testcase("sqlite.c", true)
+	testcase("spec", false)
+	testcase("sqlite.h", true)
 	testcase("picture.gif", false)
 	testcase("LICENSE.md", true)
 }
