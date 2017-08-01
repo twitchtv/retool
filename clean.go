@@ -134,12 +134,12 @@ func keepFile(filename string) bool {
 	if strings.HasSuffix(filename, "_test.go") {
 		return false
 	}
-	if strings.HasSuffix(filename, ".go") {
+
+	switch filepath.Ext(filename) {
+	case ".go", ".s", ".c", ".h":
 		return true
 	}
-	if strings.HasSuffix(filename, ".s") {
-		return true
-	}
+
 	if isLegalFile(filename) {
 		return true
 	}
