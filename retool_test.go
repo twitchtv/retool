@@ -98,6 +98,29 @@ func TestRetool(t *testing.T) {
 			}
 		})
 
+		t.Run("build_with_fork", func(t *testing.T) {
+			t.Parallel()
+			dir, cleanup := setupTempDir(t)
+			defer cleanup()
+			runRetoolCmd(t, dir, retool, "-f", "https://github.com/franciscocpg/retool.git", "add", "github.com/twitchtv/retool", "origin/master")
+
+			// Suppose we only have _tools/src available. Does `retool build` work?
+			_ = os.RemoveAll(filepath.Join(dir, "_tools", "bin"))
+			_ = os.RemoveAll(filepath.Join(dir, "_tools", "pkg"))
+			_ = os.RemoveAll(filepath.Join(dir, "_tools", "manifest.json"))
+
+			runRetoolCmd(t, dir, retool, "build")
+
+			// Now the binary should be installed
+			assertBinInstalled(t, dir, "retool")
+
+			// Legal files should be kept around
+			_, err := os.Stat(filepath.Join(dir, "_tools", "src", "github.com", "twitchtv", "retool", "LICENSE"))
+			if err != nil {
+				t.Error("missing license file")
+			}
+		})
+
 		t.Run("build_with_gobin_set", func(t *testing.T) {
 			// Even if GOBIN is set to a directory not controlled by retool, running
 			// 'retool build' should still put built binaries in _tools/bin.
