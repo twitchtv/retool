@@ -8,7 +8,7 @@ import (
 	"github.com/Masterminds/semver"
 )
 
-var version = semver.MustParse("v1.3.4")
+var version = semver.MustParse("v1.3.5")
 
 func main() {
 	flag.Parse()
