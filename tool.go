@@ -61,11 +61,29 @@ func get(t *tool) error {
 func setVersion(t *tool) error {
 	// If we're using a fork, add it
 	if t.Fork != "" {
-		cmd := exec.Command("git", "remote", "rm", "fork")
+		cmd := exec.Command("git", "remote")
 		cmd.Dir = t.path()
-		_, err := cmd.Output()
+		b, err := cmd.Output()
 		if err != nil {
 			return err
+		}
+
+		rs := strings.Split(string(b), "\n")
+		containsFork := false
+		for _, r := range rs {
+			if r == "fork" {
+				containsFork = true
+				break
+			}
+		}
+
+		if containsFork {
+			cmd = exec.Command("git", "remote", "rm", "fork")
+			cmd.Dir = t.path()
+			_, err = cmd.Output()
+			if err != nil {
+				return err
+			}
 		}
 
 		cmd = exec.Command("git", "remote", "add", "-f", "fork", t.Fork)
