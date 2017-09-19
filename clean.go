@@ -191,6 +191,8 @@ var preservedDirectories = []string{
 	// sqlboiler requires template files to exist at runtime. See pull request #25.
 	filepath.Join("github.com", "vattle", "sqlboiler", "templates"),
 	filepath.Join("github.com", "vattle", "sqlboiler", "templates_test"),
+	filepath.Join("github.com", "volatiletech", "sqlboiler", "templates"),
+	filepath.Join("github.com", "volatiletech", "sqlboiler", "templates_test"),
 }
 
 // checks whether path is in the list of preserved directories.
