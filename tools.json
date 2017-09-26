@@ -27,7 +27,11 @@
     {
       "Repository": "github.com/gordonklaus/ineffassign",
       "Commit": "99762ed65232b1477364c8c53778f8b6503e868c"
+    },
+    {
+      "Repository": "github.com/spenczar/go-gh-releaser",
+      "Commit": "c538a068ce390df2b2a102ad916a986901019e89"
     }
   ],
-  "RetoolVersion": "1.3.0"
+  "RetoolVersion": "1.3.5"
 }
