@@ -29,6 +29,9 @@ func setGoEnv() error {
 	}
 
 	prevGoPath := os.Getenv("GOPATH")
+	if prevGoPath == "" {
+		prevGoPath = filepath.Join(os.Getenv("HOME"), "go")
+	}
 	newGoPath := prevGoPath + string(os.PathListSeparator) + toolDirPath
 	return os.Setenv("GOPATH", newGoPath)
 }
