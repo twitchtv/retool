@@ -41,7 +41,7 @@ func setEnvVar(cmd *exec.Cmd, key, val string) {
 		}
 	}
 	if !envSet {
-		env = append(cmd.Env, key+"="+val)
+		env = append(env, key+"="+val)
 	}
 
 	cmd.Env = env
