@@ -8,11 +8,17 @@ import (
 
 var (
 	verboseFlag = flag.Bool("verbose", false, "Enable more detailed output that may be helpful for troubleshooting.")
-	forkFlag    = flag.String("f", "", "Use a fork of the repository rather than the default upstream")
+	forkFlag    = flag.String("f", "", "Use a fork of the repository rather than the default upstream when adding a tool.")
 
 	// TODO: Refactor so that this global state is not necessary.
 	positionalArgs []string
 )
+
+func init() {
+	flag.Usage = func() {
+		printUsage("")
+	}
+}
 
 func verbosef(format string, a ...interface{}) {
 	if *verboseFlag {
@@ -93,6 +99,11 @@ func assertArgLength(args []string, command string, arglength int) {
 }
 
 func printUsageAndExit(command string, exitCode int) {
+	printUsage(command)
+	os.Exit(exitCode)
+}
+
+func printUsage(command string) {
 	switch command {
 	case "add":
 		fmt.Println(addUsage)
@@ -111,10 +122,11 @@ func printUsageAndExit(command string, exitCode int) {
 	default:
 		fmt.Println(usage)
 	}
-	os.Exit(exitCode)
+	fmt.Println("Flags:")
+	flag.PrintDefaults()
 }
 
-const usage = `usage: retool (add | remove | upgrade | sync | do | build | help)
+const usage = `usage: retool (add | remove | upgrade | sync | do | build | help | version)
 
 use retool with a subcommand:
 
