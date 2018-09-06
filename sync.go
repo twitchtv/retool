@@ -1,6 +1,20 @@
 package main
 
-import "os"
+import (
+	"fmt"
+	"os"
+
+	"golang.org/x/sync/errgroup"
+)
+
+type syncError struct {
+	cmdName string
+	err     error
+}
+
+func (e *syncError) Error() string {
+	return fmt.Sprintf("failed to sync %s: %s", e.cmdName, e.err)
+}
 
 func (s spec) sync() {
 	m := getManifest()
@@ -18,11 +32,22 @@ func (s spec) sync() {
 		}
 
 		// Download everything to tool directory
+		var eg errgroup.Group
 		for _, t := range s.Tools {
-			err = download(t)
-			if err != nil {
-				fatalExec("failed to sync "+t.Repository, err)
-			}
+			t := t
+			eg.Go(func() error {
+				if err := download(t); err != nil {
+					return &syncError{
+						cmdName: t.Repository,
+						err:     err,
+					}
+				}
+				return nil
+			})
+		}
+		if err := eg.Wait(); err != nil {
+			serr := err.(*syncError)
+			fatalExec(serr.cmdName, serr.err)
 		}
 
 		// Install the packages
