@@ -19,11 +19,11 @@ const (
 
 var (
 	baseDir = flag.String("base-dir", "",
-		"Path of project root.  If not specified and the working directory is within a git repository, the root of "+
-			"the repository is used.  If the working directory is not within a git repository, the working directory "+
+		"Path of project root. If not specified and the working directory is within a git repository, the root of "+
+			"the repository is used. If the working directory is not within a git repository, the working directory "+
 			"is used.")
 	toolDir = flag.String("tool-dir", "",
-		"Path where tools are stored.  The default value is the subdirectory of -base-dir named '_tools'.")
+		"Path where tools are stored. The default value is the subdirectory of -base-dir named '_tools'.")
 
 	// These globals are set by ensureTooldir() after factoring in the flags above.
 	baseDirPath string
