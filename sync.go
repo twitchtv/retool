@@ -1,6 +1,9 @@
 package main
 
-import "os"
+import (
+	"os"
+	"path/filepath"
+)
 
 func (s spec) sync() {
 	m := getManifest()
@@ -30,5 +33,28 @@ func (s spec) sync() {
 
 		// Delete unneccessary source files
 		s.cleanup()
+		return
+	}
+
+	// code of tools has been cached, now check if binaries also cached
+	binPath := filepath.Join(toolDirPath, "bin")
+	binPathManifest := filepath.Join(binPath, manifestFile)
+	buildBin := func() {
+		s.build()
+		s.cleanup()
+	}
+
+	if _, err := os.Stat(binPath); os.IsNotExist(err) {
+		buildBin()
+		return
+	}
+	if _, err := os.Stat(binPathManifest); os.IsNotExist(err) {
+		buildBin()
+		return
+	}
+
+	m2 := getBinPathManifest()
+	if !m.equals(m2) {
+		buildBin()
 	}
 }

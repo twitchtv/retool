@@ -28,6 +28,24 @@ func getManifest() manifest {
 	return m
 }
 
+func getBinPathManifest() manifest {
+	m := manifest{}
+
+	file, err := os.Open(filepath.Join(toolDirPath, "bin", manifestFile))
+	if err != nil {
+		return m
+	}
+	defer func() {
+		_ = file.Close()
+	}()
+
+	err = json.NewDecoder(file).Decode(&m)
+	if err != nil {
+		fatal("Failed to decode manifest", err)
+	}
+	return m
+}
+
 func (m manifest) write() {
 	f, err := os.Create(filepath.Join(toolDirPath, manifestFile))
 	if err != nil {
@@ -43,6 +61,15 @@ func (m manifest) write() {
 	}
 
 	_, _ = f.Write(bytes)
+
+	// write to binPath
+	f2, err := os.Create(filepath.Join(toolDirPath, "bin", manifestFile))
+	if err != nil {
+		return
+	}
+	defer f2.Close()
+
+	_, _ = f2.Write(bytes)
 }
 
 func (m manifest) outOfDate(ts []*tool) bool {
@@ -69,4 +96,16 @@ func (m manifest) replace(ts []*tool) {
 	for _, t := range ts {
 		m[t.Repository] = t.Commit
 	}
+}
+
+func (m manifest) equals(other manifest) bool {
+	if len(m) != len(other) {
+		return false
+	}
+	for k, v := range m {
+		if other[k] != v {
+			return false
+		}
+	}
+	return true
 }
