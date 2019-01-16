@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -11,10 +12,12 @@ import (
 )
 
 type tool struct {
-	Repository string // eg "github.com/tools/godep"
-	Commit     string // eg "3020345802e4bff23902cfc1d19e90a79fae714e"
-	ref        string // eg "origin/master"
-	Fork       string `json:"Fork,omitempty"` // eg "code.jusin.tv/twitch/godep"
+	Repository     string   // eg "github.com/tools/godep"
+	Commit         string   // eg "3020345802e4bff23902cfc1d19e90a79fae714e"
+	ref            string   // eg "origin/master"
+	Fork           string   `json:"Fork,omitempty"` // eg "code.jusin.tv/twitch/godep"
+	ExecutableName string   `json:",omitempty"`     // eg "mydep"
+	PreParams      []string `json:",omitempty"`     // eg "-tags 'postgres'"
 }
 
 func (t *tool) path() string {
@@ -150,11 +153,27 @@ func download(t *tool) error {
 
 func install(t *tool) error {
 	log("installing " + t.Repository)
-	cmd := exec.Command("go", "install", t.Repository)
+	var params []string
+	if t.ExecutableName != "" {
+		// overwrite the executable name
+		params = []string{"-o", path.Join(toolDirPath, "bin", t.ExecutableName), t.Repository}
+		if len(t.PreParams) > 0 {
+			// prepend with the pre params
+			params = append(t.PreParams, params...)
+		}
+		// build should be the first arg
+		params = append([]string{"build"}, params...)
+	} else {
+		params = []string{"install", t.Repository}
+	}
+	cmd := exec.Command("go", params...)
 	setEnvVar(cmd, "GOPATH", toolDirPath)
 	_, err := cmd.Output()
 	if err != nil {
-		return errors.Wrap(err, "failed to 'go install' tool")
+		if t.ExecutableName == "" {
+			return errors.Wrap(err, "failed to 'go install' tool")
+		}
+		return errors.Wrapf(err, "failed to 'go build' tool, params: %+v", params)
 	}
 	return err
 }
