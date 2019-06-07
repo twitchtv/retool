@@ -5,9 +5,10 @@
 // https://developers.google.com/open-source/licenses/bsd.
 
 // Package lint contains a linter for Go source code.
-package lint
+package lint // import "golang.org/x/lint"
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"go/ast"
@@ -22,6 +23,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"golang.org/x/tools/go/ast/astutil"
 	"golang.org/x/tools/go/gcexportdata"
 )
 
@@ -81,15 +83,15 @@ func (l *Linter) Lint(filename string, src []byte) ([]Problem, error) {
 // LintFiles lints a set of files of a single package.
 // The argument is a map of filename to source.
 func (l *Linter) LintFiles(files map[string][]byte) ([]Problem, error) {
-	if len(files) == 0 {
-		return nil, nil
-	}
 	pkg := &pkg{
 		fset:  token.NewFileSet(),
 		files: make(map[string]*file),
 	}
 	var pkgName string
 	for filename, src := range files {
+		if isGenerated(src) {
+			continue // See issue #239
+		}
 		f, err := parser.ParseFile(pkg.fset, filename, src, parser.ParseComments)
 		if err != nil {
 			return nil, err
@@ -107,7 +109,28 @@ func (l *Linter) LintFiles(files map[string][]byte) ([]Problem, error) {
 			filename: filename,
 		}
 	}
+	if len(pkg.files) == 0 {
+		return nil, nil
+	}
 	return pkg.lint(), nil
+}
+
+var (
+	genHdr = []byte("// Code generated ")
+	genFtr = []byte(" DO NOT EDIT.")
+)
+
+// isGenerated reports whether the source file is generated code
+// according the rules from https://golang.org/s/generatedcode.
+func isGenerated(src []byte) bool {
+	sc := bufio.NewScanner(bytes.NewReader(src))
+	for sc.Scan() {
+		b := sc.Bytes()
+		if bytes.HasPrefix(b, genHdr) && bytes.HasSuffix(b, genFtr) && len(b) >= len(genHdr)+len(genFtr) {
+			return true
+		}
+	}
+	return false
 }
 
 // pkg represents a package being linted.
@@ -504,7 +527,10 @@ func (f *file) lintExported() {
 	})
 }
 
-var allCapsRE = regexp.MustCompile(`^[A-Z0-9_]+$`)
+var (
+	allCapsRE = regexp.MustCompile(`^[A-Z0-9_]+$`)
+	anyCapsRE = regexp.MustCompile(`[A-Z]`)
+)
 
 // knownNameExceptions is a set of names that are known to be exempt from naming checks.
 // This is usually because they are constrained by having to match names in the
@@ -514,12 +540,27 @@ var knownNameExceptions = map[string]bool{
 	"kWh":          true,
 }
 
+func isInTopLevel(f *ast.File, ident *ast.Ident) bool {
+	path, _ := astutil.PathEnclosingInterval(f, ident.Pos(), ident.End())
+	for _, f := range path {
+		switch f.(type) {
+		case *ast.File, *ast.GenDecl, *ast.ValueSpec, *ast.Ident:
+			continue
+		}
+		return false
+	}
+	return true
+}
+
 // lintNames examines all names in the file.
 // It complains if any use underscores or incorrect known initialisms.
 func (f *file) lintNames() {
 	// Package names need slightly different handling than other names.
 	if strings.Contains(f.f.Name.Name, "_") && !strings.HasSuffix(f.f.Name.Name, "_test") {
 		f.errorf(f.f, 1, link("http://golang.org/doc/effective_go.html#package-names"), category("naming"), "don't use an underscore in package name")
+	}
+	if anyCapsRE.MatchString(f.f.Name.Name) {
+		f.errorf(f.f, 1, link("http://golang.org/doc/effective_go.html#package-names"), category("mixed-caps"), "don't use MixedCaps in package name; %s should be %s", f.f.Name.Name, strings.ToLower(f.f.Name.Name))
 	}
 
 	check := func(id *ast.Ident, thing string) {
@@ -532,12 +573,22 @@ func (f *file) lintNames() {
 
 		// Handle two common styles from other languages that don't belong in Go.
 		if len(id.Name) >= 5 && allCapsRE.MatchString(id.Name) && strings.Contains(id.Name, "_") {
-			f.errorf(id, 0.8, link(styleGuideBase+"#mixed-caps"), category("naming"), "don't use ALL_CAPS in Go names; use CamelCase")
-			return
+			capCount := 0
+			for _, c := range id.Name {
+				if 'A' <= c && c <= 'Z' {
+					capCount++
+				}
+			}
+			if capCount >= 2 {
+				f.errorf(id, 0.8, link(styleGuideBase+"#mixed-caps"), category("naming"), "don't use ALL_CAPS in Go names; use CamelCase")
+				return
+			}
 		}
-		if len(id.Name) > 2 && id.Name[0] == 'k' && id.Name[1] >= 'A' && id.Name[1] <= 'Z' {
-			should := string(id.Name[1]+'a'-'A') + id.Name[2:]
-			f.errorf(id, 0.8, link(styleGuideBase+"#mixed-caps"), category("naming"), "don't use leading k in Go names; %s %s should be %s", thing, id.Name, should)
+		if thing == "const" || (thing == "var" && isInTopLevel(f.f, id)) {
+			if len(id.Name) > 2 && id.Name[0] == 'k' && id.Name[1] >= 'A' && id.Name[1] <= 'Z' {
+				should := string(id.Name[1]+'a'-'A') + id.Name[2:]
+				f.errorf(id, 0.8, link(styleGuideBase+"#mixed-caps"), category("naming"), "don't use leading k in Go names; %s %s should be %s", thing, id.Name, should)
+			}
 		}
 
 		should := lintName(id.Name)
@@ -1016,11 +1067,11 @@ func (f *file) lintElses() {
 		if !ok || ifStmt.Else == nil {
 			return true
 		}
-		if ignore[ifStmt] {
-			return true
-		}
 		if elseif, ok := ifStmt.Else.(*ast.IfStmt); ok {
 			ignore[elseif] = true
+			return true
+		}
+		if ignore[ifStmt] {
 			return true
 		}
 		if _, ok := ifStmt.Else.(*ast.BlockStmt); !ok {
@@ -1055,20 +1106,25 @@ func (f *file) lintRanges() {
 		if !ok {
 			return true
 		}
-		if rs.Value == nil {
-			// for x = range m { ... }
-			return true // single var form
-		}
-		if !isIdent(rs.Value, "_") {
-			// for ?, y = range m { ... }
+
+		if isIdent(rs.Key, "_") && (rs.Value == nil || isIdent(rs.Value, "_")) {
+			p := f.errorf(rs.Key, 1, category("range-loop"), "should omit values from range; this loop is equivalent to `for range ...`")
+
+			newRS := *rs // shallow copy
+			newRS.Value = nil
+			newRS.Key = nil
+			p.ReplacementLine = f.firstLineOf(&newRS, rs)
+
 			return true
 		}
 
-		p := f.errorf(rs.Value, 1, category("range-loop"), "should omit 2nd value from range; this loop is equivalent to `for %s %s range ...`", f.render(rs.Key), rs.Tok)
+		if isIdent(rs.Value, "_") {
+			p := f.errorf(rs.Value, 1, category("range-loop"), "should omit 2nd value from range; this loop is equivalent to `for %s %s range ...`", f.render(rs.Key), rs.Tok)
 
-		newRS := *rs // shallow copy
-		newRS.Value = nil
-		p.ReplacementLine = f.firstLineOf(&newRS, rs)
+			newRS := *rs // shallow copy
+			newRS.Value = nil
+			p.ReplacementLine = f.firstLineOf(&newRS, rs)
+		}
 
 		return true
 	})
@@ -1090,6 +1146,9 @@ func (f *file) lintErrorf() {
 			}
 		}
 		if !isErrorsNew && !isTestingError {
+			return true
+		}
+		if !f.imports("errors") {
 			return true
 		}
 		arg := ce.Args[0]
@@ -1215,7 +1274,7 @@ func (f *file) lintReceiverNames() {
 		name := names[0].Name
 		const ref = styleGuideBase + "#receiver-names"
 		if name == "_" {
-			f.errorf(n, 1, link(ref), category("naming"), `receiver name should not be an underscore`)
+			f.errorf(n, 1, link(ref), category("naming"), `receiver name should not be an underscore, omit the name if it is unused`)
 			return true
 		}
 		if name == "this" || name == "self" {
@@ -1270,6 +1329,9 @@ func (f *file) lintErrorReturn() {
 		}
 		ret := fn.Type.Results.List
 		if len(ret) <= 1 {
+			return true
+		}
+		if isIdent(ret[len(ret)-1].Type, "error") {
 			return true
 		}
 		// An error return parameter should be the last parameter.
@@ -1444,6 +1506,28 @@ func (f *file) lintContextArgs() {
 	})
 }
 
+// containsComments returns whether the interval [start, end) contains any
+// comments without "// MATCH " prefix.
+func (f *file) containsComments(start, end token.Pos) bool {
+	for _, cgroup := range f.f.Comments {
+		comments := cgroup.List
+		if comments[0].Slash >= end {
+			// All comments starting with this group are after end pos.
+			return false
+		}
+		if comments[len(comments)-1].Slash < start {
+			// Comments group ends before start pos.
+			continue
+		}
+		for _, c := range comments {
+			if start <= c.Slash && c.Slash < end && !strings.HasPrefix(c.Text, "// MATCH ") {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 // receiverType returns the named type of the method receiver, sans "*",
 // or "invalid-type" if fn.Recv is ill formed.
 func receiverType(fn *ast.FuncDecl) string {
@@ -1502,11 +1586,6 @@ func isBlank(id *ast.Ident) bool { return id != nil && id.Name == "_" }
 func isPkgDot(expr ast.Expr, pkg, name string) bool {
 	sel, ok := expr.(*ast.SelectorExpr)
 	return ok && isIdent(sel.X, pkg) && isIdent(sel.Sel, name)
-}
-
-func isZero(expr ast.Expr) bool {
-	lit, ok := expr.(*ast.BasicLit)
-	return ok && lit.Kind == token.INT && lit.Value == "0"
 }
 
 func isOne(expr ast.Expr) bool {
@@ -1584,6 +1663,20 @@ func (f *file) srcLineWithMatch(node ast.Node, pattern string) (m []string) {
 	line = strings.TrimSuffix(line, "\n")
 	rx := regexp.MustCompile(pattern)
 	return rx.FindStringSubmatch(line)
+}
+
+// imports returns true if the current file imports the specified package path.
+func (f *file) imports(importPath string) bool {
+	all := astutil.Imports(f.fset, f.f)
+	for _, p := range all {
+		for _, i := range p {
+			uq, err := strconv.Unquote(i.Path.Value)
+			if err == nil && importPath == uq {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // srcLine returns the complete line at p, including the terminating newline.
