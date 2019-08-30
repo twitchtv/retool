@@ -50,6 +50,7 @@ func setEnvVar(cmd *exec.Cmd, key, val string) {
 func get(t *tool) error {
 	log("downloading " + t.Repository)
 	cmd := exec.Command("go", "get", "-d", t.Repository)
+	setEnvVar(cmd, "GO111MODULE", "off")
 	setEnvVar(cmd, "GOPATH", toolDirPath)
 	_, err := cmd.Output()
 	if err != nil {
@@ -127,6 +128,7 @@ func setVersion(t *tool) error {
 	// Re-run 'go get' in case the new version has a different set of dependencies.
 	cmd = exec.Command("go", "get", "-d", t.Repository)
 	setEnvVar(cmd, "GOPATH", toolDirPath)
+	setEnvVar(cmd, "GO111MODULE", "off")
 	_, err = cmd.Output()
 	if err != nil {
 		return errors.Wrap(err, "failed to 'go get' tool")
@@ -152,6 +154,7 @@ func install(t *tool) error {
 	log("installing " + t.Repository)
 	cmd := exec.Command("go", "install", t.Repository)
 	setEnvVar(cmd, "GOPATH", toolDirPath)
+	setEnvVar(cmd, "GO111MODULE", "off")
 	_, err := cmd.Output()
 	if err != nil {
 		return errors.Wrap(err, "failed to 'go install' tool")
