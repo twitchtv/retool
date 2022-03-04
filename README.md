@@ -1,3 +1,13 @@
+# Retool is Deprecated #
+
+As of March 2, 2022, retool is officially deprecated and will receive no further updates. This repo will remain available in read-only mode. We recommend customers of retool manage their tool dependencies using Go Modules instead, as recommended and supported by the core Go project. [This wiki entry in the golang/go repository](https://github.com/golang/go/wiki/Modules#how-can-i-track-tool-dependencies-for-a-module) explains exactly how to do that.
+
+For more information, please consult the blog linked above or the [official docs on Go Modules](https://go.dev/ref/mod).
+
+Thank you for using retool!
+
+---
+
 # Retool: Vendor thy tools! #
 
 [![Build Status](https://travis-ci.org/twitchtv/retool.svg?branch=master)](https://travis-ci.org/twitchtv/retool)
